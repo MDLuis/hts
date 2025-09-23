@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 class Chapter(BaseModel):
     """
@@ -27,3 +27,16 @@ class Section(BaseModel):
     sec_number: str
     title: str
     chapters: List[Chapter]
+
+class GeneralNote(BaseModel):
+    note_number: Optional[str]
+    title: str
+    text: str
+
+class SectionNote(BaseModel):
+    section_number: str
+    text: str
+
+class ChapterNote(BaseModel):
+    chapter_number: str
+    text: str
