@@ -5,28 +5,23 @@
     "chapters": [
       {
         "ch_number": "1",
-        "title": "Live animals",
-        "notes": null
+        "title": "Live animals"
       },
       {
         "ch_number": "2",
-        "title": "Meat and edible meat offal",
-        "notes": null
+        "title": "Meat and edible meat offal"
       },
       {
         "ch_number": "3",
-        "title": "Fish and crustaceans, molluscs and other aquatic invertebrates",
-        "notes": null
+        "title": "Fish and crustaceans, molluscs and other aquatic invertebrates"
       },
       {
         "ch_number": "4",
-        "title": "Dairy produce; birds´ eggs; natural honey; edible products of animal origin, not elsewhere specified or included",
-        "notes": null
+        "title": "Dairy produce; birds´ eggs; natural honey; edible products of animal origin, not elsewhere specified or included"
       },
       {
         "ch_number": "5",
-        "title": "Products of animal origin, not elsewhere specified or included",
-        "notes": null
+        "title": "Products of animal origin, not elsewhere specified or included"
       }
     ]
   },
@@ -36,48 +31,39 @@
     "chapters": [
       {
         "ch_number": "6",
-        "title": "Live trees and other plants; bulbs, roots and the like; cut flowers and ornamental foliage",
-        "notes": null
+        "title": "Live trees and other plants; bulbs, roots and the like; cut flowers and ornamental foliage"
       },
       {
         "ch_number": "7",
-        "title": "Edible vegetables and certain roots and tubers",
-        "notes": null
+        "title": "Edible vegetables and certain roots and tubers"
       },
       {
         "ch_number": "8",
-        "title": "Edible fruit and nuts; peel of citrus fruit or melons",
-        "notes": null
+        "title": "Edible fruit and nuts; peel of citrus fruit or melons"
       },
       {
         "ch_number": "9",
-        "title": "Coffee, tea, maté and spices",
-        "notes": null
+        "title": "Coffee, tea, maté and spices"
       },
       {
         "ch_number": "10",
-        "title": "Cereals",
-        "notes": null
+        "title": "Cereals"
       },
       {
         "ch_number": "11",
-        "title": "Products of the milling industry; malt; starches; inulin; wheat gluten",
-        "notes": null
+        "title": "Products of the milling industry; malt; starches; inulin; wheat gluten"
       },
       {
         "ch_number": "12",
-        "title": "Oil seeds and oleaginous fruits; miscellaneous grains, seeds and fruit; industrial or medicinal plants; straw and fodder",
-        "notes": null
+        "title": "Oil seeds and oleaginous fruits; miscellaneous grains, seeds and fruit; industrial or medicinal plants; straw and fodder"
       },
       {
         "ch_number": "13",
-        "title": "Lac; gums; resins and other vegetable saps and extracts",
-        "notes": null
+        "title": "Lac; gums; resins and other vegetable saps and extracts"
       },
       {
         "ch_number": "14",
-        "title": "Vegetable plaiting materials; vegetable products not elsewhere specified or included",
-        "notes": null
+        "title": "Vegetable plaiting materials; vegetable products not elsewhere specified or included"
       }
     ]
   },
@@ -87,8 +73,7 @@
     "chapters": [
       {
         "ch_number": "15",
-        "title": "Animal, vegetable or microbial fats and oils and their cleavage products; prepared edible fats; animal or vegetable waxes",
-        "notes": null
+        "title": "Animal, vegetable or microbial fats and oils and their cleavage products; prepared edible fats; animal or vegetable waxes"
       }
     ]
   },
@@ -98,48 +83,39 @@
     "chapters": [
       {
         "ch_number": "16",
-        "title": "Preparations of meat, of fish, of crustaceans, molluscs or other aquatic invertebrates, or of insects",
-        "notes": null
+        "title": "Preparations of meat, of fish, of crustaceans, molluscs or other aquatic invertebrates, or of insects"
       },
       {
         "ch_number": "17",
-        "title": "Sugars and sugar confectionery",
-        "notes": null
+        "title": "Sugars and sugar confectionery"
       },
       {
         "ch_number": "18",
-        "title": "Cocoa and cocoa preparations",
-        "notes": null
+        "title": "Cocoa and cocoa preparations"
       },
       {
         "ch_number": "19",
-        "title": "Preparations of cereals, flour, starch or milk; bakers' wares",
-        "notes": null
+        "title": "Preparations of cereals, flour, starch or milk; bakers' wares"
       },
       {
         "ch_number": "20",
-        "title": "Preparations of vegetables, fruit, nuts or other parts of plants",
-        "notes": null
+        "title": "Preparations of vegetables, fruit, nuts or other parts of plants"
       },
       {
         "ch_number": "21",
-        "title": "Miscellaneous edible preparations",
-        "notes": null
+        "title": "Miscellaneous edible preparations"
       },
       {
         "ch_number": "22",
-        "title": "Beverages, spirits and vinegar",
-        "notes": null
+        "title": "Beverages, spirits and vinegar"
       },
       {
         "ch_number": "23",
-        "title": "Residues and waste from the food industries; prepared animal feed",
-        "notes": null
+        "title": "Residues and waste from the food industries; prepared animal feed"
       },
       {
         "ch_number": "24",
-        "title": "Tobacco and manufactured tobacco substitutes; products whether or not containing nicotine, intended for inhalation without combustion; other nicotine containing products intended for the intake of nicotine into the human body",
-        "notes": null
+        "title": "Tobacco and manufactured tobacco substitutes; products whether or not containing nicotine, intended for inhalation without combustion; other nicotine containing products intended for the intake of nicotine into the human body"
       }
     ]
   },
@@ -149,18 +125,15 @@
     "chapters": [
       {
         "ch_number": "25",
-        "title": "Salt; sulfur; earths and stone; plastering materials, lime and cement",
-        "notes": null
+        "title": "Salt; sulfur; earths and stone; plastering materials, lime and cement"
       },
       {
         "ch_number": "26",
-        "title": "Ores, slag and ash",
-        "notes": null
+        "title": "Ores, slag and ash"
       },
       {
         "ch_number": "27",
-        "title": "Mineral fuels, mineral oils and products of their distillation; bituminous substances; mineral waxes",
-        "notes": null
+        "title": "Mineral fuels, mineral oils and products of their distillation; bituminous substances; mineral waxes"
       }
     ]
   },
@@ -170,58 +143,47 @@
     "chapters": [
       {
         "ch_number": "28",
-        "title": "Inorganic chemicals; organic or inorganic compounds of precious metals, of rare-earth metals, of radioactive elements or of isotopes",
-        "notes": null
+        "title": "Inorganic chemicals; organic or inorganic compounds of precious metals, of rare-earth metals, of radioactive elements or of isotopes"
       },
       {
         "ch_number": "29",
-        "title": "Organic chemicals",
-        "notes": null
+        "title": "Organic chemicals"
       },
       {
         "ch_number": "30",
-        "title": "Pharmaceutical products",
-        "notes": null
+        "title": "Pharmaceutical products"
       },
       {
         "ch_number": "31",
-        "title": "Fertilizers",
-        "notes": null
+        "title": "Fertilizers"
       },
       {
         "ch_number": "32",
-        "title": "Tanning or dyeing extracts; tannins and their derivatives; dyes, pigments and other coloring matter; paints and varnishes; putty and other mastics; inks",
-        "notes": null
+        "title": "Tanning or dyeing extracts; tannins and their derivatives; dyes, pigments and other coloring matter; paints and varnishes; putty and other mastics; inks"
       },
       {
         "ch_number": "33",
-        "title": "Essential oils and resinoids; perfumery, cosmetic or toilet preparations",
-        "notes": null
+        "title": "Essential oils and resinoids; perfumery, cosmetic or toilet preparations"
       },
       {
         "ch_number": "34",
-        "title": "Soap, organic surface-active agents, washing preparations, lubricating preparations, artificial waxes, prepared waxes, polishing or scouring preparations, candles and similar articles, modeling pastes,\"dental waxes\" and dental preparations with a basis of plaster",
-        "notes": null
+        "title": "Soap, organic surface-active agents, washing preparations, lubricating preparations, artificial waxes, prepared waxes, polishing or scouring preparations, candles and similar articles, modeling pastes,\"dental waxes\" and dental preparations with a basis of plaster"
       },
       {
         "ch_number": "35",
-        "title": "Albuminoidal substances; modified starches; glues; enzymes",
-        "notes": null
+        "title": "Albuminoidal substances; modified starches; glues; enzymes"
       },
       {
         "ch_number": "36",
-        "title": "Explosives; pyrotechnic products; matches; pyrophoric alloys; certain combustible preparations",
-        "notes": null
+        "title": "Explosives; pyrotechnic products; matches; pyrophoric alloys; certain combustible preparations"
       },
       {
         "ch_number": "37",
-        "title": "Photographic or cinematographic goods",
-        "notes": null
+        "title": "Photographic or cinematographic goods"
       },
       {
         "ch_number": "38",
-        "title": "Miscellaneous chemical products",
-        "notes": null
+        "title": "Miscellaneous chemical products"
       }
     ]
   },
@@ -231,13 +193,11 @@
     "chapters": [
       {
         "ch_number": "39",
-        "title": "Plastics and articles thereof",
-        "notes": null
+        "title": "Plastics and articles thereof"
       },
       {
         "ch_number": "40",
-        "title": "Rubber and articles thereof",
-        "notes": null
+        "title": "Rubber and articles thereof"
       }
     ]
   },
@@ -247,18 +207,15 @@
     "chapters": [
       {
         "ch_number": "41",
-        "title": "Raw hides and skins (other than furskins) and leather",
-        "notes": null
+        "title": "Raw hides and skins (other than furskins) and leather"
       },
       {
         "ch_number": "42",
-        "title": "Articles of leather; saddlery and harness; travel goods, handbags and similar containers; articles of animal gut (other than silkworm gut)",
-        "notes": null
+        "title": "Articles of leather; saddlery and harness; travel goods, handbags and similar containers; articles of animal gut (other than silkworm gut)"
       },
       {
         "ch_number": "43",
-        "title": "Furskins and artificial fur; manufactures thereof",
-        "notes": null
+        "title": "Furskins and artificial fur; manufactures thereof"
       }
     ]
   },
@@ -268,18 +225,15 @@
     "chapters": [
       {
         "ch_number": "44",
-        "title": "Wood and articles of wood; wood charcoal",
-        "notes": null
+        "title": "Wood and articles of wood; wood charcoal"
       },
       {
         "ch_number": "45",
-        "title": "Cork and articles of cork",
-        "notes": null
+        "title": "Cork and articles of cork"
       },
       {
         "ch_number": "46",
-        "title": "Manufactures of straw, of esparto or of other plaiting materials; basketware and wickerwork",
-        "notes": null
+        "title": "Manufactures of straw, of esparto or of other plaiting materials; basketware and wickerwork"
       }
     ]
   },
@@ -289,18 +243,15 @@
     "chapters": [
       {
         "ch_number": "47",
-        "title": "Pulp of wood or of other fibrous cellulosic material; recovered (waste and scrap) paper or paperboard",
-        "notes": null
+        "title": "Pulp of wood or of other fibrous cellulosic material; recovered (waste and scrap) paper or paperboard"
       },
       {
         "ch_number": "48",
-        "title": "Paper and paperboard; articles of paper pulp, of paper or of paperboard",
-        "notes": null
+        "title": "Paper and paperboard; articles of paper pulp, of paper or of paperboard"
       },
       {
         "ch_number": "49",
-        "title": "Printed books, newspapers, pictures and other products of the printing industry; manuscripts, typescripts and plans",
-        "notes": null
+        "title": "Printed books, newspapers, pictures and other products of the printing industry; manuscripts, typescripts and plans"
       }
     ]
   },
@@ -310,73 +261,59 @@
     "chapters": [
       {
         "ch_number": "50",
-        "title": "Silk",
-        "notes": null
+        "title": "Silk"
       },
       {
         "ch_number": "51",
-        "title": "Wool, fine or coarse animal hair; horsehair yarn and woven fabric",
-        "notes": null
+        "title": "Wool, fine or coarse animal hair; horsehair yarn and woven fabric"
       },
       {
         "ch_number": "52",
-        "title": "Cotton",
-        "notes": null
+        "title": "Cotton"
       },
       {
         "ch_number": "53",
-        "title": "Other vegetable textile fibers; paper yarn and woven fabrics of paper yarn",
-        "notes": null
+        "title": "Other vegetable textile fibers; paper yarn and woven fabrics of paper yarn"
       },
       {
         "ch_number": "54",
-        "title": "Man-made filaments; strip and the like of man-made textile materials",
-        "notes": null
+        "title": "Man-made filaments; strip and the like of man-made textile materials"
       },
       {
         "ch_number": "55",
-        "title": "Man-made staple fibers",
-        "notes": null
+        "title": "Man-made staple fibers"
       },
       {
         "ch_number": "56",
-        "title": "Wadding, felt and nonwovens; special yarns; twine, cordage, ropes and cables and articles thereof",
-        "notes": null
+        "title": "Wadding, felt and nonwovens; special yarns; twine, cordage, ropes and cables and articles thereof"
       },
       {
         "ch_number": "57",
-        "title": "Carpets and other textile floor coverings",
-        "notes": null
+        "title": "Carpets and other textile floor coverings"
       },
       {
         "ch_number": "58",
-        "title": "Special woven fabrics; tufted textile fabrics; lace; tapestries; trimmings; embroidery",
-        "notes": null
+        "title": "Special woven fabrics; tufted textile fabrics; lace; tapestries; trimmings; embroidery"
       },
       {
         "ch_number": "59",
-        "title": "Impregnated, coated, covered or laminated textile fabrics; textile articles of a kind suitable for industrial use",
-        "notes": null
+        "title": "Impregnated, coated, covered or laminated textile fabrics; textile articles of a kind suitable for industrial use"
       },
       {
         "ch_number": "60",
-        "title": "Knitted or crocheted fabrics",
-        "notes": null
+        "title": "Knitted or crocheted fabrics"
       },
       {
         "ch_number": "61",
-        "title": "Articles of apparel and clothing accessories, knitted or crocheted",
-        "notes": null
+        "title": "Articles of apparel and clothing accessories, knitted or crocheted"
       },
       {
         "ch_number": "62",
-        "title": "Articles of apparel and clothing accessories, not knitted or crocheted",
-        "notes": null
+        "title": "Articles of apparel and clothing accessories, not knitted or crocheted"
       },
       {
         "ch_number": "63",
-        "title": "Other made up textile articles; needlecraft sets; worn clothing and worn textile articles; rags",
-        "notes": null
+        "title": "Other made up textile articles; needlecraft sets; worn clothing and worn textile articles; rags"
       }
     ]
   },
@@ -386,23 +323,19 @@
     "chapters": [
       {
         "ch_number": "64",
-        "title": "Footwear, gaiters and the like; parts of such articles",
-        "notes": null
+        "title": "Footwear, gaiters and the like; parts of such articles"
       },
       {
         "ch_number": "65",
-        "title": "Headgear and parts thereof",
-        "notes": null
+        "title": "Headgear and parts thereof"
       },
       {
         "ch_number": "66",
-        "title": "Umbrellas, sun umbrellas, walking-sticks, seat-sticks, whips, riding-crops and parts thereof",
-        "notes": null
+        "title": "Umbrellas, sun umbrellas, walking-sticks, seat-sticks, whips, riding-crops and parts thereof"
       },
       {
         "ch_number": "67",
-        "title": "Prepared feathers and down and articles made of feathers or of down; artificial flowers; articles of human hair",
-        "notes": null
+        "title": "Prepared feathers and down and articles made of feathers or of down; artificial flowers; articles of human hair"
       }
     ]
   },
@@ -412,18 +345,15 @@
     "chapters": [
       {
         "ch_number": "68",
-        "title": "Articles of stone, plaster, cement, asbestos, mica or similar materials",
-        "notes": null
+        "title": "Articles of stone, plaster, cement, asbestos, mica or similar materials"
       },
       {
         "ch_number": "69",
-        "title": "Ceramic products",
-        "notes": null
+        "title": "Ceramic products"
       },
       {
         "ch_number": "70",
-        "title": "Glass and glassware",
-        "notes": null
+        "title": "Glass and glassware"
       }
     ]
   },
@@ -433,8 +363,7 @@
     "chapters": [
       {
         "ch_number": "71",
-        "title": "Natural or cultured pearls, precious or semiprecious stones, precious metals, metals clad with precious metal, and articles thereof; imitation jewelry; coin",
-        "notes": null
+        "title": "Natural or cultured pearls, precious or semiprecious stones, precious metals, metals clad with precious metal, and articles thereof; imitation jewelry; coin"
       }
     ]
   },
@@ -444,63 +373,51 @@
     "chapters": [
       {
         "ch_number": "72",
-        "title": "Iron and steel",
-        "notes": null
+        "title": "Iron and steel"
       },
       {
         "ch_number": "73",
-        "title": "Articles of iron or steel",
-        "notes": null
+        "title": "Articles of iron or steel"
       },
       {
         "ch_number": "74",
-        "title": "Copper and articles thereof",
-        "notes": null
+        "title": "Copper and articles thereof"
       },
       {
         "ch_number": "75",
-        "title": "Nickel and articles thereof",
-        "notes": null
+        "title": "Nickel and articles thereof"
       },
       {
         "ch_number": "76",
-        "title": "Aluminum and articles thereof",
-        "notes": null
+        "title": "Aluminum and articles thereof"
       },
       {
         "ch_number": "77",
-        "title": "(Reserved for possible future use)",
-        "notes": null
+        "title": "(Reserved for possible future use)"
       },
       {
         "ch_number": "78",
-        "title": "Lead and articles thereof",
-        "notes": null
+        "title": "Lead and articles thereof"
       },
       {
         "ch_number": "79",
-        "title": "Zinc and articles thereof",
-        "notes": null
+        "title": "Zinc and articles thereof"
       },
       {
         "ch_number": "80",
-        "title": "Tin and articles thereof",
-        "notes": null
+        "title": "Tin and articles thereof"
       },
       {
         "ch_number": "81",
-        "title": "Other base metals; cermets; articles thereof",
-        "notes": null
+        "title": "Other base metals; cermets; articles thereof"
       },
       {
         "ch_number": "82",
-        "title": "Tools, implements, cutlery, spoons and forks, of base metal; parts thereof of base metal",
-        "notes": null
+        "title": "Tools, implements, cutlery, spoons and forks, of base metal; parts thereof of base metal"
       },
       {
         "ch_number": "83",
-        "title": "Miscellaneous articles of base metal",
-        "notes": null
+        "title": "Miscellaneous articles of base metal"
       }
     ]
   },
@@ -510,13 +427,11 @@
     "chapters": [
       {
         "ch_number": "84",
-        "title": "Nuclear reactors, boilers, machinery and mechanical appliances; parts thereof",
-        "notes": null
+        "title": "Nuclear reactors, boilers, machinery and mechanical appliances; parts thereof"
       },
       {
         "ch_number": "85",
-        "title": "Electrical machinery and equipment and parts thereof; sound recorders and reproducers, television image and sound recorders and reproducers, and parts and accessories of such articles",
-        "notes": null
+        "title": "Electrical machinery and equipment and parts thereof; sound recorders and reproducers, television image and sound recorders and reproducers, and parts and accessories of such articles"
       }
     ]
   },
@@ -526,23 +441,19 @@
     "chapters": [
       {
         "ch_number": "86",
-        "title": "Railway or tramway locomotives, rolling stock and parts thereof; railway or tramway track fixtures and fittings and parts thereof; mechanical (including electro-mechanical) traffic signaling equipment of all kinds",
-        "notes": null
+        "title": "Railway or tramway locomotives, rolling stock and parts thereof; railway or tramway track fixtures and fittings and parts thereof; mechanical (including electro-mechanical) traffic signaling equipment of all kinds"
       },
       {
         "ch_number": "87",
-        "title": "Vehicles other than railway or tramway rolling stock, and parts and accessories thereof",
-        "notes": null
+        "title": "Vehicles other than railway or tramway rolling stock, and parts and accessories thereof"
       },
       {
         "ch_number": "88",
-        "title": "Aircraft, spacecraft, and parts thereof",
-        "notes": null
+        "title": "Aircraft, spacecraft, and parts thereof"
       },
       {
         "ch_number": "89",
-        "title": "Ships, boats and floating structures",
-        "notes": null
+        "title": "Ships, boats and floating structures"
       }
     ]
   },
@@ -552,18 +463,15 @@
     "chapters": [
       {
         "ch_number": "90",
-        "title": "Optical, photographic, cinematographic, measuring, checking, precision, medical or surgical instruments and apparatus; parts and accessories thereof",
-        "notes": null
+        "title": "Optical, photographic, cinematographic, measuring, checking, precision, medical or surgical instruments and apparatus; parts and accessories thereof"
       },
       {
         "ch_number": "91",
-        "title": "Clocks and watches and parts thereof",
-        "notes": null
+        "title": "Clocks and watches and parts thereof"
       },
       {
         "ch_number": "92",
-        "title": "Musical instruments; parts and accessories of such articles",
-        "notes": null
+        "title": "Musical instruments; parts and accessories of such articles"
       }
     ]
   },
@@ -573,8 +481,7 @@
     "chapters": [
       {
         "ch_number": "93",
-        "title": "Arms and ammunition; parts and accessories thereof",
-        "notes": null
+        "title": "Arms and ammunition; parts and accessories thereof"
       }
     ]
   },
@@ -584,18 +491,15 @@
     "chapters": [
       {
         "ch_number": "94",
-        "title": "Furniture; bedding, mattresses, mattress supports, cushions and similar stuffed furnishings; luminaires and lighting fittings, not elsewhere specified or included; illuminated signs, illuminated nameplates and the like; prefabricated buildings",
-        "notes": null
+        "title": "Furniture; bedding, mattresses, mattress supports, cushions and similar stuffed furnishings; luminaires and lighting fittings, not elsewhere specified or included; illuminated signs, illuminated nameplates and the like; prefabricated buildings"
       },
       {
         "ch_number": "95",
-        "title": "Toys, games and sports equipment; parts and accessories thereof",
-        "notes": null
+        "title": "Toys, games and sports equipment; parts and accessories thereof"
       },
       {
         "ch_number": "96",
-        "title": "Miscellaneous manufactured articles",
-        "notes": null
+        "title": "Miscellaneous manufactured articles"
       }
     ]
   },
@@ -605,8 +509,7 @@
     "chapters": [
       {
         "ch_number": "97",
-        "title": "Works of art, collectors' pieces and antiques",
-        "notes": null
+        "title": "Works of art, collectors' pieces and antiques"
       }
     ]
   },
@@ -616,13 +519,11 @@
     "chapters": [
       {
         "ch_number": "98",
-        "title": "Special classification provisions",
-        "notes": null
+        "title": "Special classification provisions"
       },
       {
         "ch_number": "99",
-        "title": "Temporary legislation; temporary modifications established pursuant to trade legislation; additional import restrictions established pursuant to section 22 of the Agricultural Adjustment Act, as amended Chemical Appendix to the Harmonized Tariff Schedule Pharmaceutical Appendix to the Harmonized Tariff Schedule Intermediate Chemicals for Dyes Appendix Statistical Annexes Annex A - Schedule C, Classification of Country and Territory Designations for U.S. Foreign Trade Statistics Annex B - International Standard Country Codes Annex C - Schedule D, Customs District and Port Codes Change Record",
-        "notes": null
+        "title": "Temporary legislation; temporary modifications established pursuant to trade legislation; additional import restrictions established pursuant to section 22 of the Agricultural Adjustment Act, as amended Chemical Appendix to the Harmonized Tariff Schedule Pharmaceutical Appendix to the Harmonized Tariff Schedule Intermediate Chemicals for Dyes Appendix Statistical Annexes Annex A - Schedule C, Classification of Country and Territory Designations for U.S. Foreign Trade Statistics Annex B - International Standard Country Codes Annex C - Schedule D, Customs District and Port Codes Change Record"
       }
     ]
   }

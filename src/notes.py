@@ -1,18 +1,25 @@
 from .base import Source
-from .models import GeneralNote
+from .models import GeneralNote, SectionNote, ChapterNote, Note
 import requests, pdfplumber, json, re
+
+BASE_URL = "https://hts.usitc.gov/reststop/file"
 
 class GeneralNotesSource(Source):
     """
     Source class to fetch & parse one specific General Note.
     """
-
-    BASE_URL = "https://hts.usitc.gov/reststop/file"
-
     # Fetch
     def fetch(self, note_num: int, pdf_path: str = None) -> str:
         """
         Download a specific General Note PDF.
+
+        Args:
+            note_num (int): The General Note number to download.
+            pdf_path (str, optional): File path to save the PDF.
+                Defaults to 'general_note_{note_num}.pdf'.
+
+        Returns:
+            str: Path to the saved PDF file.
         """
         if pdf_path is None:
             pdf_path = f"general_note_{note_num}.pdf"
@@ -21,7 +28,7 @@ class GeneralNotesSource(Source):
             "filename": f"General Note {note_num}",
             "release": "currentRelease"
         }
-        resp = requests.get(self.BASE_URL, params=params, stream=True)
+        resp = requests.get(BASE_URL, params=params, stream=True)
         resp.raise_for_status()
         with open(pdf_path, "wb") as f:
             for chunk in resp.iter_content(chunk_size=8192):
@@ -31,8 +38,17 @@ class GeneralNotesSource(Source):
     # Parse
     def parse(self, pdf_path: str, note_num: int) -> GeneralNote:
         """
-        Parse one General Note PDF into a GeneralNote by scanning line by line.
-        More robust for inconsistent layouts (titles on their own line or dot without space).
+        Parse one General Note PDF into a `GeneralNote` object.
+
+        Scans line by line for a more robust approach to inconsistent layouts
+        (e.g., titles on their own line or dot without space).
+
+        Args:
+            pdf_path (str): Path to the General Note PDF file.
+            note_num (int): The General Note number to parse.
+
+        Returns:
+            GeneralNote: Structured representation of the General Note.
         """
         with pdfplumber.open(pdf_path) as pdf:
             pages = [p.extract_text() or "" for p in pdf.pages]
@@ -108,6 +124,13 @@ class GeneralNotesSource(Source):
 
     # Save
     def save(self, data: GeneralNote, filepath: str = None):
+        """
+        Save a `GeneralNote` or a list of `GeneralNote` objects to JSON.
+
+        Args:
+            data (GeneralNote or list[GeneralNote]): Note data to save.
+            filepath (str, optional): Destination file path. Defaults to 'general_notes.json'.
+        """
         if filepath is None:
             filepath = "general_notes.json"
 
@@ -118,3 +141,187 @@ class GeneralNotesSource(Source):
 
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
+
+# Section Notes
+class SectionNotesSource(Source):
+    """
+    Source class to fetch, parse, and save Section Notes.
+    """
+    def fetch(self, chapter_num: int, filepath: str = None) -> str:
+        """
+        Download the PDF for a given chapter number.
+
+        Args:
+            chapter_num (int): The chapter number containing the section note.
+            filepath (str, optional): Destination PDF file path.
+                Defaults to 'chapter_{chapter_num}.pdf'.
+
+        Returns:
+            str: Path to the saved PDF file.
+        """
+        if filepath is None:
+            filepath = f"chapter_{chapter_num}.pdf"
+        url = f"{BASE_URL}?release=currentRelease&filename=Chapter%20{chapter_num}"
+        r = requests.get(url)
+        r.raise_for_status()
+        with open(filepath, "wb") as f:
+            f.write(r.content)
+        return filepath
+
+    def parse(self, pdf_path: str) -> SectionNote:
+        """
+        Extracts section notes from the PDF, automatically detecting the section number.
+
+        Args:
+            pdf_path (str): Path to the Section Note PDF file.
+
+        Returns:
+            SectionNote: Structured representation of the section note.
+        """
+        # 1. Read all text from PDF
+        text = ""
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text += t + "\n"
+
+        # 2. Automatically detect section roman numeral (I, II, III...)
+        m_section = re.search(r"SECTION\s+([IVXLCDM]+)", text, re.I)
+        section_number = m_section.group(1) if m_section else "?"
+
+        # 3. Clip text before first CHAPTER to avoid chapter content
+        m_clip = re.search(rf"(SECTION\s+{section_number}.*?)(?=CHAPTER\s+\d+)", text, re.S | re.I)
+        section_text = m_clip.group(1) if m_clip else text
+
+        # 4. Extract individual notes as Note objects
+        note_pattern = re.compile(r"Notes?\s*(\d+)\.\s*(.*?)(?=(?:\n\d+\.)|\Z)", re.S | re.I)
+        notes: list[Note] = []
+        for match in note_pattern.finditer(section_text):
+            notes.append(
+                Note(
+                    note_number=match.group(1),
+                    text=match.group(2).strip()
+                )
+            )
+
+        return SectionNote(section_number=section_number, notes=notes)
+
+    def save(self, data: list[SectionNote], filepath: str = None):
+        """
+        Save a list of `SectionNote` objects to JSON.
+
+        Args:
+            data (list[SectionNote]): Section note data to save.
+            filepath (str, optional): Destination JSON file path.
+                Defaults to 'section_notes.json'.
+        """
+        if filepath is None:
+            filepath = "section_notes.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump([d.model_dump() for d in data], f, ensure_ascii=False, indent=2)
+
+class ChapterNotesSource(Source):
+    """
+    Source class to fetch, parse, and save Chapter Notes.
+    """
+    def fetch(self, chapter_num: int, pdf_path: str = None) -> str:
+        """
+        Download a chapter PDF.
+
+        Args:
+            chapter_num (int): Chapter number to download.
+            pdf_path (str, optional): Destination file path.
+                Defaults to 'chapter_{chapter_num}.pdf'.
+
+        Returns:
+            str: Path to the saved PDF file.
+        """
+        if pdf_path is None:
+            pdf_path = f"chapter_{chapter_num}.pdf"
+        url = f"{BASE_URL}?release=currentRelease&filename=Chapter%20{chapter_num}"
+        r = requests.get(url)
+        r.raise_for_status()
+        with open(pdf_path, "wb") as f:
+            f.write(r.content)
+        return pdf_path
+
+    def parse(self, pdf_path: str) -> ChapterNote:
+        """
+        Extract chapter notes from a single-chapter PDF.
+
+        Skips anything before 'CHAPTER X' to avoid section notes.
+        Stops at Additional U.S. Notes, Subheading Notes, Statistical Notes,
+        or table headers.
+
+        Args:
+            pdf_path (str): Path to the Chapter PDF file.
+
+        Returns:
+            ChapterNote: Structured representation of the chapter notes.
+        """
+        # 1. Read all text
+        text = ""
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text += t + "\n"
+
+        # 2. Detect chapter number
+        m_chapter = re.search(r"CHAPTER\s+(\d+)", text, re.I)
+        if not m_chapter:
+            return ChapterNote(chapter_number="?", notes=[])
+        chapter_number = m_chapter.group(1)
+
+        # 3. Trim everything before "CHAPTER X"
+        text_after_chapter = text[m_chapter.start():]
+
+        # 4. Find notes block, stop at any known marker or table header
+        m_notes_block = re.search(
+            r"Notes?\s*(.*?)(?=(?:\nAdditional\s+U\.S\.|\nSubheading\s+Notes|\nStatistical\s+Notes|\nHeading/|\nRates\s+of\s+Duty|\Z))",
+            text_after_chapter,
+            re.S | re.I
+        )
+        if not m_notes_block:
+            return ChapterNote(chapter_number=chapter_number, notes=[])
+
+        notes_block = m_notes_block.group(1)
+
+        # 5. Extract numbered notes as Note objects
+        note_pattern = re.compile(
+            r"(\d+)\.\s*(.*?)(?=(?:\n\d+\.)|(?:\nAdditional\s+U\.S\.)|(?:\nSubheading\s+Notes)|(?:\nStatistical\s+Notes)|(?:\nHeading/)|(?:\nRates\s+of\s+Duty)|\Z)",
+            re.S | re.I
+        )
+
+        notes: list[Note] = []
+        for match in note_pattern.finditer(notes_block):
+            raw_text = match.group(2).strip()
+            cut = re.split(
+                r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes|Statistical\s+Notes|Additional\s+U\.S\.)",
+                raw_text, 1, flags=re.I
+            )
+            clean_text = cut[0].strip()
+            notes.append(
+                Note(
+                    note_number=match.group(1),
+                    text=clean_text
+                )
+            )
+
+        return ChapterNote(chapter_number=chapter_number, notes=notes)
+
+    def save(self, data: list[ChapterNote], filepath: str = None):
+        """
+        Save a list of `ChapterNote` objects to JSON.
+
+        Args:
+            data (list[ChapterNote]): Chapter note data to save.
+            filepath (str, optional): Destination JSON file path.
+                Defaults to 'chapter_notes.json'.
+        """
+        """Save a list of ChapterNote objects to JSON."""
+        if filepath is None:
+            filepath = "chapter_notes.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump([d.model_dump() for d in data], f, ensure_ascii=False, indent=2)
