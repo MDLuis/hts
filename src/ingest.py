@@ -95,7 +95,7 @@ class HTSSource(Source):
                     j += 1
 
                 current_section.chapters.append(
-                    Chapter(ch_number=chap_num, title=chap_title, notes=None)
+                    Chapter(ch_number=chap_num, title=chap_title)
                 )
                 i = j
                 continue
