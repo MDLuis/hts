@@ -1,6 +1,6 @@
 from src.notes import GeneralNotesSource, SectionNotesSource, ChapterNotesSource, AdditionalUSNotesSource
 from src.ingest import HTSSource
-
+from src.tables import TariffTableSource
 def main():
     # # Testing the ingest of Sections and Chapters
     # source = HTSSource()
@@ -45,18 +45,27 @@ def main():
     #     print(f"Chapter {chapter_notes.chapter_number} has {len(chapter_notes.notes)} notes")
     # src.save(results)
 
-    # Testing for chapter notes
-    src = AdditionalUSNotesSource()
+    # # Testing for chapter notes
+    # src = AdditionalUSNotesSource()
+    # results = []
+    # for ch in range(1,20):
+    #     if ch != 77:
+    #         pdf_path = src.fetch(ch)
+    #         additional_notes = src.parse(pdf_path)
+    #         if additional_notes:
+    #             results.append(additional_notes)
+    #             print(f"Chapter {additional_notes.chapter_number} has {len(additional_notes.notes)} notes")
+    #         else:
+    #             print(f"No additional u.s. notes in chapter {ch}")
+    # src.save(results)
+
+    # Testing for tariff tables
+    src = TariffTableSource()
     results = []
-    for ch in range(1,20):
-        if ch != 77:
-            pdf_path = src.fetch(ch)
-            additional_notes = src.parse(pdf_path)
-            if additional_notes:
-                results.append(additional_notes)
-                print(f"Chapter {additional_notes.chapter_number} has {len(additional_notes.notes)} notes")
-            else:
-                print(f"No additional u.s. notes in chapter {ch}")
+    for ch in range(1, 5): 
+        path = src.fetch(ch)
+        tariff_table = src.parse(path)
+        results.append(tariff_table)
     src.save(results)
 
 
