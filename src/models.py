@@ -67,3 +67,7 @@ class SectionNote(BaseModel):
     """
     section_number: str
     notes: List[Note]
+
+class AdditionalUSNotes(BaseModel):
+    chapter_number: str
+    notes: list[Note]

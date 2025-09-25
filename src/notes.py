@@ -1,5 +1,5 @@
 from .base import Source
-from .models import GeneralNote, SectionNote, ChapterNote, Note
+from .models import GeneralNote, SectionNote, ChapterNote, Note, AdditionalUSNotes
 import requests, pdfplumber, json, re
 
 BASE_URL = "https://hts.usitc.gov/reststop/file"
@@ -323,5 +323,121 @@ class ChapterNotesSource(Source):
         """Save a list of ChapterNote objects to JSON."""
         if filepath is None:
             filepath = "chapter_notes.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump([d.model_dump() for d in data], f, ensure_ascii=False, indent=2)
+
+class AdditionalUSNotesSource(Source):
+    """
+    Source class to fetch, parse, and save Additional U.S. Notes.
+    """
+    def fetch(self, chapter_num: int, pdf_path: str = None) -> str:
+        """
+        Download a chapter PDF.
+        Args:
+            chapter_num (int): Chapter number to download.
+            pdf_path (str, optional): Destination file path.
+                Defaults to 'chapter_{chapter_num}.pdf'.
+        Returns:
+            str: Path to the saved PDF file.
+        """
+        if pdf_path is None:
+            pdf_path = f"chapter_{chapter_num}.pdf"
+        url = f"{BASE_URL}?release=currentRelease&filename=Chapter%20{chapter_num}"
+        r = requests.get(url)
+        r.raise_for_status()
+        with open(pdf_path, "wb") as f:
+            f.write(r.content)
+        return pdf_path
+
+    def parse(self, pdf_path: str) -> AdditionalUSNotes:
+        """
+        Extract Additional U.S. Notes from a single-chapter PDF.
+
+        Only triggers if the exact case-sensitive heading "Additional U.S. Notes"
+        or "Additional U.S. Note" appears.
+        Stops at Subheading Notes, Statistical Notes, table headers, or EOF.
+        Splits notes only on lines starting with small integer note numbers
+        followed by a dot and whitespace (e.g. "7. The ...") to avoid treating
+        HS codes like "1701.91.44" as note boundaries.
+
+        Args:
+            pdf_path (str): Path to the chapter PDF file.
+
+        Returns:
+            AdditionalUSNotes: Structured representation of the Additional U.S. Notes,
+                or None if no such section is found.
+        """
+        # 1) read pdf text
+        text = ""
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text += t + "\n"
+
+        # 2) detect chapter number
+        m_chap = re.search(r"^\s*CHAPTER\s+(\d+)", text, re.I | re.M)
+        chapter_number = m_chap.group(1) if m_chap else "?"
+
+        # 3) find exact case-sensitive heading (plural or singular)
+        idx = text.find("Additional U.S. Notes")
+        heading = "Additional U.S. Notes"
+        if idx == -1:
+            idx = text.find("Additional U.S. Note")
+            heading = "Additional U.S. Note"
+        if idx == -1:
+            return None  # no Additional U.S. Notes/Note in this chapter
+
+        # slice text after the heading
+        text_after = text[idx + len(heading):]
+
+        # 4) stop at next known section/table markers (case-insensitive for markers)
+        stop_re = re.compile(r"(?=\n(Subheading\s+Notes?|Statistical\s+Notes?|Heading/|Rates\s+of\s+Duty|\Z))", re.I)
+        m_stop = stop_re.search(text_after)
+        if m_stop:
+            notes_block = text_after[:m_stop.start()]
+        else:
+            notes_block = text_after
+
+        # 5) Normalize line breaks a bit
+        #    Keep line breaks so we can split on line-started note numbers, but normalize multiple blank lines.
+        notes_block = re.sub(r"\r\n?", "\n", notes_block)
+        notes_block = re.sub(r"\n{2,}", "\n\n", notes_block)
+
+        # 6) Split into note-parts by looking for a newline followed by:
+        #    optional whitespace, 1-3 digits, dot, whitespace  -> this avoids HS codes like 1701.91.44
+        parts = re.split(r"\n(?=\s*\d{1,3}\.\s)", notes_block, flags=re.M)
+
+        notes = []
+        note_re = re.compile(r"^\s*(\d{1,3})\.\s*(.*)", re.S | re.M)
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+            m = note_re.match(part)
+            if not m:
+                # skip fragments that don't look like "N. text"
+                continue
+            number = m.group(1)
+            body = m.group(2).strip()
+            # Final safety cut: remove any trailing table markers accidentally included
+            body = re.split(r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)", body, 1, flags=re.I)[0].strip()
+            notes.append(Note(note_number=number, text=body))
+        if not notes:
+            return None
+
+        return AdditionalUSNotes(chapter_number=chapter_number, notes=notes)
+
+    def save(self, data: list[AdditionalUSNotes], filepath: str = None):
+        """
+        Save a list of AdditionalUSNotes objects to JSON.
+
+        Args:
+            data (list[AdditionalUSNotes]): Additional U.S. Notes data to save.
+            filepath (str, optional): Destination JSON file path.
+                Defaults to 'additional_us_notes.json'.
+        """
+        if filepath is None:
+            filepath = "additional_us_notes.json"
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump([d.model_dump() for d in data], f, ensure_ascii=False, indent=2)

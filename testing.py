@@ -1,4 +1,4 @@
-from src.notes import GeneralNotesSource, SectionNotesSource, ChapterNotesSource
+from src.notes import GeneralNotesSource, SectionNotesSource, ChapterNotesSource, AdditionalUSNotesSource
 from src.ingest import HTSSource
 
 def main():
@@ -34,16 +34,31 @@ def main():
     #         all_sections.append(section_notes)
     # src.save(all_sections)
 
+    # # Testing for chapter notes
+    # src = ChapterNotesSource()
+    # chapters = [1, 2, 6, 15, 16]  # testing  a few of them
+    # results = []
+    # for ch in chapters:
+    #     pdf_path = src.fetch(ch)
+    #     chapter_notes = src.parse(pdf_path)
+    #     results.append(chapter_notes)
+    #     print(f"Chapter {chapter_notes.chapter_number} has {len(chapter_notes.notes)} notes")
+    # src.save(results)
+
     # Testing for chapter notes
-    src = ChapterNotesSource()
-    chapters = [1, 2, 6, 15, 16]  # testing  a few of them
+    src = AdditionalUSNotesSource()
     results = []
-    for ch in chapters:
-        pdf_path = src.fetch(ch)
-        chapter_notes = src.parse(pdf_path)
-        results.append(chapter_notes)
-        print(f"Chapter {chapter_notes.chapter_number} has {len(chapter_notes.notes)} notes")
+    for ch in range(1,20):
+        if ch != 77:
+            pdf_path = src.fetch(ch)
+            additional_notes = src.parse(pdf_path)
+            if additional_notes:
+                results.append(additional_notes)
+                print(f"Chapter {additional_notes.chapter_number} has {len(additional_notes.notes)} notes")
+            else:
+                print(f"No additional u.s. notes in chapter {ch}")
     src.save(results)
+
 
 if __name__ == "__main__":
     main()
