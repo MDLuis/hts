@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any
 
 class Chapter(BaseModel):
     """
@@ -71,3 +71,27 @@ class SectionNote(BaseModel):
 class AdditionalUSNotes(BaseModel):
     chapter_number: str
     notes: list[Note]
+
+class Footnote(BaseModel):
+    columns: List[str]
+    marker: Optional[str] = None
+    value: str
+    type: Optional[str]
+
+class TariffRow(BaseModel):
+    htsno: Optional[str]
+    indent: Optional[str]
+    description: str
+    superior: Optional[str]
+    units: Optional[List[str]]
+    general: Optional[str]
+    special: Optional[str]
+    other: Optional[str]
+    footnotes: Optional[List[Footnote]]
+    quotaQuantity: Optional[str]
+    additionalDuties: Optional[str]
+    addiitionalDuties: Optional[Any]
+
+class TariffTable(BaseModel):
+    chapter_number: str
+    rows: List[TariffRow]
