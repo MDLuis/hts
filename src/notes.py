@@ -1,8 +1,69 @@
 from .base import Source
 from .models import GeneralNote, SectionNote, ChapterNote, Note, AdditionalUSNotes
 import requests, pdfplumber, json, re
+from datetime import date
+from pathlib import Path
 
 BASE_URL = "https://hts.usitc.gov/reststop/file"
+pdf_ch = Path("pdf/chapters")
+
+def versioning(data, base_filename: str, folder: str = "pdf", version: str | None = None) -> str:
+    """
+    Save data to a JSON file with versioned filename and 'latest' copy.
+
+    Args:
+        data: A list of Pydantic models or a single model.
+        base_filename: Base name without extension (e.g. 'general_notes').
+        folder: Subfolder under 'data/' where files will be stored.
+        version: Optional version string. Defaults to today's date.
+
+    Returns:
+        str: Path to the versioned file.
+    """
+    version = version or date.today().isoformat()
+    out_dir = Path(folder)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    versioned_path = out_dir / f"{base_filename}_v{version}.json"
+    latest_path = out_dir / f"{base_filename}_latest.json"
+
+    # convert to list of dicts or dict
+    if isinstance(data, list):
+        payload = [d.model_dump() for d in data]
+    else:
+        payload = data.model_dump()
+
+    text = json.dumps(payload, indent=2, ensure_ascii=False)
+    versioned_path.write_text(text, encoding="utf-8")
+    latest_path.write_text(text, encoding="utf-8")
+
+    return str(versioned_path)
+
+def download_chapter_pdf(chapter_num: int, filename: str = None) -> str:
+    """
+    Download a chapter PDF from the HTS site and save it under pdf.
+
+    Args:
+        chapter_num (int): Chapter number to download.
+        filename (str, optional): Custom PDF filename.
+            Defaults to 'chapter_{chapter_num}.pdf'.
+
+    Returns:
+        str: Full path to the saved PDF file.
+    """
+    if filename is None:
+        filename = f"chapter_{chapter_num}.pdf"
+    pdf_path = pdf_ch / filename
+    pdf_path.parent.mkdir(parents=True, exist_ok=True)
+
+    url = f"{BASE_URL}?release=currentRelease&filename=Chapter%20{chapter_num}"
+    r = requests.get(url)
+    r.raise_for_status()
+
+    with open(pdf_path, "wb") as f:
+        f.write(r.content)
+
+    return str(pdf_path)
 
 class GeneralNotesSource(Source):
     """
@@ -11,18 +72,17 @@ class GeneralNotesSource(Source):
     # Fetch
     def fetch(self, note_num: int, pdf_path: str = None) -> str:
         """
-        Download a specific General Note PDF.
-
-        Args:
-            note_num (int): The General Note number to download.
-            pdf_path (str, optional): File path to save the PDF.
-                Defaults to 'general_note_{note_num}.pdf'.
-
-        Returns:
-            str: Path to the saved PDF file.
+        Download a specific General Note PDF to the default folder.
         """
+        # ensure folder exists
+        pdf_dir = Path("pdf/general_notes")
+        pdf_dir.mkdir(parents=True, exist_ok=True)
+
+        # if user didn’t pass a path, build one automatically
         if pdf_path is None:
-            pdf_path = f"general_note_{note_num}.pdf"
+            pdf_path = pdf_dir / f"general_note_{note_num}.pdf"
+        else:
+            pdf_path = Path(pdf_path)
 
         params = {
             "filename": f"General Note {note_num}",
@@ -33,7 +93,7 @@ class GeneralNotesSource(Source):
         with open(pdf_path, "wb") as f:
             for chunk in resp.iter_content(chunk_size=8192):
                 f.write(chunk)
-        return pdf_path
+        return str(pdf_path)
 
     # Parse
     def parse(self, pdf_path: str, note_num: int) -> GeneralNote:
@@ -123,50 +183,17 @@ class GeneralNotesSource(Source):
 
 
     # Save
-    def save(self, data: GeneralNote, filepath: str = None):
-        """
-        Save a `GeneralNote` or a list of `GeneralNote` objects to JSON.
-
-        Args:
-            data (GeneralNote or list[GeneralNote]): Note data to save.
-            filepath (str, optional): Destination file path. Defaults to 'general_notes.json'.
-        """
-        if filepath is None:
-            filepath = "general_notes.json"
-
-        if isinstance(data, list):
-            payload = [d.model_dump() for d in data]
-        else:
-            payload = data.model_dump()
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
-
+    def save(self, data: GeneralNote | list[GeneralNote], filepath: str = None, version: str = None):
+        base_filename = filepath or "general_notes"
+        return versioning(data, base_filename, folder="data/notes/general", version=version)
+        
 # Section Notes
 class SectionNotesSource(Source):
     """
     Source class to fetch, parse, and save Section Notes.
     """
-    def fetch(self, chapter_num: int, filepath: str = None) -> str:
-        """
-        Download the PDF for a given chapter number.
-
-        Args:
-            chapter_num (int): The chapter number containing the section note.
-            filepath (str, optional): Destination PDF file path.
-                Defaults to 'chapter_{chapter_num}.pdf'.
-
-        Returns:
-            str: Path to the saved PDF file.
-        """
-        if filepath is None:
-            filepath = f"chapter_{chapter_num}.pdf"
-        url = f"{BASE_URL}?release=currentRelease&filename=Chapter%20{chapter_num}"
-        r = requests.get(url)
-        r.raise_for_status()
-        with open(filepath, "wb") as f:
-            f.write(r.content)
-        return filepath
+    def fetch(self, chapter_num: int, filename: str = None) -> str:
+        return download_chapter_pdf(chapter_num, filename)
 
     def parse(self, pdf_path: str) -> SectionNote:
         """
@@ -207,44 +234,16 @@ class SectionNotesSource(Source):
 
         return SectionNote(section_number=section_number, notes=notes)
 
-    def save(self, data: list[SectionNote], filepath: str = None):
-        """
-        Save a list of `SectionNote` objects to JSON.
-
-        Args:
-            data (list[SectionNote]): Section note data to save.
-            filepath (str, optional): Destination JSON file path.
-                Defaults to 'section_notes.json'.
-        """
-        if filepath is None:
-            filepath = "section_notes.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump([d.model_dump() for d in data], f, ensure_ascii=False, indent=2)
+    def save(self, data: list[SectionNote], filepath: str = None, version: str = None):
+        base_filename = filepath or "section_notes"
+        return versioning(data, base_filename, folder="data/notes/section", version=version)
 
 class ChapterNotesSource(Source):
     """
     Source class to fetch, parse, and save Chapter Notes.
     """
-    def fetch(self, chapter_num: int, pdf_path: str = None) -> str:
-        """
-        Download a chapter PDF.
-
-        Args:
-            chapter_num (int): Chapter number to download.
-            pdf_path (str, optional): Destination file path.
-                Defaults to 'chapter_{chapter_num}.pdf'.
-
-        Returns:
-            str: Path to the saved PDF file.
-        """
-        if pdf_path is None:
-            pdf_path = f"chapter_{chapter_num}.pdf"
-        url = f"{BASE_URL}?release=currentRelease&filename=Chapter%20{chapter_num}"
-        r = requests.get(url)
-        r.raise_for_status()
-        with open(pdf_path, "wb") as f:
-            f.write(r.content)
-        return pdf_path
+    def fetch(self, chapter_num: int, filename: str = None) -> str:
+        return download_chapter_pdf(chapter_num, filename)
 
     def parse(self, pdf_path: str) -> ChapterNote:
         """
@@ -311,43 +310,16 @@ class ChapterNotesSource(Source):
 
         return ChapterNote(chapter_number=chapter_number, notes=notes)
 
-    def save(self, data: list[ChapterNote], filepath: str = None):
-        """
-        Save a list of `ChapterNote` objects to JSON.
-
-        Args:
-            data (list[ChapterNote]): Chapter note data to save.
-            filepath (str, optional): Destination JSON file path.
-                Defaults to 'chapter_notes.json'.
-        """
-        """Save a list of ChapterNote objects to JSON."""
-        if filepath is None:
-            filepath = "chapter_notes.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump([d.model_dump() for d in data], f, ensure_ascii=False, indent=2)
+    def save(self, data: list[ChapterNote], filepath: str = None, version: str = None):
+        base_filename = filepath or "chapter_notes"
+        return versioning(data, base_filename, folder="data/notes/chapter", version=version)
 
 class AdditionalUSNotesSource(Source):
     """
     Source class to fetch, parse, and save Additional U.S. Notes.
     """
-    def fetch(self, chapter_num: int, pdf_path: str = None) -> str:
-        """
-        Download a chapter PDF.
-        Args:
-            chapter_num (int): Chapter number to download.
-            pdf_path (str, optional): Destination file path.
-                Defaults to 'chapter_{chapter_num}.pdf'.
-        Returns:
-            str: Path to the saved PDF file.
-        """
-        if pdf_path is None:
-            pdf_path = f"chapter_{chapter_num}.pdf"
-        url = f"{BASE_URL}?release=currentRelease&filename=Chapter%20{chapter_num}"
-        r = requests.get(url)
-        r.raise_for_status()
-        with open(pdf_path, "wb") as f:
-            f.write(r.content)
-        return pdf_path
+    def fetch(self, chapter_num: int, filename: str = None) -> str:
+        return download_chapter_pdf(chapter_num, filename)
 
     def parse(self, pdf_path: str) -> AdditionalUSNotes:
         """
@@ -428,16 +400,6 @@ class AdditionalUSNotesSource(Source):
 
         return AdditionalUSNotes(chapter_number=chapter_number, notes=notes)
 
-    def save(self, data: list[AdditionalUSNotes], filepath: str = None):
-        """
-        Save a list of AdditionalUSNotes objects to JSON.
-
-        Args:
-            data (list[AdditionalUSNotes]): Additional U.S. Notes data to save.
-            filepath (str, optional): Destination JSON file path.
-                Defaults to 'additional_us_notes.json'.
-        """
-        if filepath is None:
-            filepath = "additional_us_notes.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump([d.model_dump() for d in data], f, ensure_ascii=False, indent=2)
+    def save(self, data: list[AdditionalUSNotes], filepath: str = None, version: str = None):
+        base_filename = filepath or "additional_us_notes"
+        return versioning(data, base_filename, folder="data/notes/additional", version=version)

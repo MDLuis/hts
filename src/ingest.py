@@ -1,10 +1,9 @@
-import re
-import json
-import requests
-import pdfplumber
+import re, json, requests, pdfplumber
+from datetime import date
 from typing import List
 from .base import Source
 from .models import Section, Chapter
+from pathlib import Path
 
 class HTSSource(Source):
     """
@@ -106,14 +105,28 @@ class HTSSource(Source):
             sections.append(current_section)
         return sections
 
-    def save(self, data: List[Section], filepath: str = "hts_sections.json") -> None:
-        """
-        Save the parsed Sections and Chapters to a JSON file.
+    def save(self, data: list[Section], filepath: str = None, version: str = None):
+        version = version or date.today().isoformat()
+        base_filename = filepath or "hts_sections"
 
-        Args:
-            data: List of Section objects.
-            filepath: Path to the JSON file (default 'hts_sections.json').
-        """
+        data_dir = Path("data/sections")
+        data_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump([s.model_dump() for s in data], f, indent=2, ensure_ascii=False)
+        versioned_path = data_dir / f"{base_filename}_v{version}.json"
+        latest_path = data_dir / f"{base_filename}_latest.json"
+
+        dicts = [s.model_dump() for s in data]
+
+        # Deduplicate by section_number
+        existing = []
+        if versioned_path.exists():
+            existing = json.loads(versioned_path.read_text(encoding="utf-8"))
+        existing_keys = {i.get("section_number") for i in existing}
+        new_data = [i for i in dicts if i.get("section_number") not in existing_keys]
+
+        combined = existing + new_data
+
+        versioned_path.write_text(json.dumps(combined, indent=2, ensure_ascii=False), encoding="utf-8")
+        latest_path.write_text(json.dumps(combined, indent=2, ensure_ascii=False), encoding="utf-8")
+
+        return str(versioned_path)

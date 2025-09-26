@@ -45,10 +45,10 @@ def main():
     #     print(f"Chapter {chapter_notes.chapter_number} has {len(chapter_notes.notes)} notes")
     # src.save(results)
 
-    # # Testing for chapter notes
+    # # Testing for additional notes
     # src = AdditionalUSNotesSource()
     # results = []
-    # for ch in range(1,20):
+    # for ch in range(1,10):
     #     if ch != 77:
     #         pdf_path = src.fetch(ch)
     #         additional_notes = src.parse(pdf_path)
