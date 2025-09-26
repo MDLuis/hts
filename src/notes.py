@@ -3,6 +3,7 @@ from .models import GeneralNote, SectionNote, ChapterNote, Note, AdditionalUSNot
 import requests, pdfplumber, json, re
 from datetime import date
 from pathlib import Path
+from typing import Optional
 
 BASE_URL = "https://hts.usitc.gov/reststop/file"
 pdf_ch = Path("pdf/chapters")
@@ -195,7 +196,7 @@ class SectionNotesSource(Source):
     def fetch(self, chapter_num: int, filename: str = None) -> str:
         return download_chapter_pdf(chapter_num, filename)
 
-    def parse(self, pdf_path: str) -> SectionNote:
+    def parse(self, pdf_path: str) -> Optional[SectionNote]:
         """
         Extracts section notes from the PDF, automatically detecting the section number.
 
@@ -203,9 +204,9 @@ class SectionNotesSource(Source):
             pdf_path (str): Path to the Section Note PDF file.
 
         Returns:
-            SectionNote: Structured representation of the section note.
+            SectionNote | None: Structured representation of the section note, 
+            or None if no section notes are found.
         """
-        # 1. Read all text from PDF
         text = ""
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
@@ -213,15 +214,22 @@ class SectionNotesSource(Source):
                 if t:
                     text += t + "\n"
 
-        # 2. Automatically detect section roman numeral (I, II, III...)
+        # Detect section header
         m_section = re.search(r"SECTION\s+([IVXLCDM]+)", text, re.I)
-        section_number = m_section.group(1) if m_section else "?"
+        if not m_section:
+            # No section header at all, skip
+            return None
+        section_number = m_section.group(1)
 
-        # 3. Clip text before first CHAPTER to avoid chapter content
-        m_clip = re.search(rf"(SECTION\s+{section_number}.*?)(?=CHAPTER\s+\d+)", text, re.S | re.I)
-        section_text = m_clip.group(1) if m_clip else text
+        # Grab only the block between SECTION and next big header (Subheading or Additional)
+        m_clip = re.search(
+            rf"(SECTION\s+{section_number}.*?)(?=(Subheading\s+Notes|Additional\s+U\.S\.|CHAPTER\s+\d+))",
+            text,
+            re.S | re.I,
+        )
+        section_text = m_clip.group(1) if m_clip else ""
 
-        # 4. Extract individual notes as Note objects
+        # Find numbered notes inside that block
         note_pattern = re.compile(r"Notes?\s*(\d+)\.\s*(.*?)(?=(?:\n\d+\.)|\Z)", re.S | re.I)
         notes: list[Note] = []
         for match in note_pattern.finditer(section_text):
@@ -232,11 +240,17 @@ class SectionNotesSource(Source):
                 )
             )
 
+        if not notes:  # no actual notes found
+            return None
+
         return SectionNote(section_number=section_number, notes=notes)
+
+
 
     def save(self, data: list[SectionNote], filepath: str = None, version: str = None):
         base_filename = filepath or "section_notes"
         return versioning(data, base_filename, folder="data/notes/section", version=version)
+
 
 class ChapterNotesSource(Source):
     """
