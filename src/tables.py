@@ -1,6 +1,8 @@
 import json, requests, re
-from .base import Source  # your abstract base class
-from .models import TariffRow, TariffTable  # the models we just defined
+from .base import Source  
+from .models import TariffRow, TariffTable 
+from datetime import date
+from pathlib import Path
 
 
 class TariffTableSource(Source):
@@ -12,7 +14,7 @@ class TariffTableSource(Source):
 
     def fetch(self, chapter_num: int, json_path: str = None) -> str:
         """
-        Download the JSON for a chapter tariff table.
+        Download the JSON for a chapter tariff table and store it under json/tables.
 
         Args:
             chapter_num (int): Chapter number to download.
@@ -22,8 +24,13 @@ class TariffTableSource(Source):
         Returns:
             str: Path to the saved JSON file.
         """
+        tables_dir = Path("json/tables")
+        tables_dir.mkdir(parents=True, exist_ok=True)
+
         if json_path is None:
-            json_path = f"chapter_{chapter_num}_table.json"
+            json_path = tables_dir / f"chapter_{chapter_num}_table.json"
+        else:
+            json_path = Path(json_path)
 
         # HTS expects from=chapter*100, to=(chapter+1)*100
         start = chapter_num * 100
@@ -38,7 +45,7 @@ class TariffTableSource(Source):
         with open(json_path, "w", encoding="utf-8") as f:
             f.write(r.text)
 
-        return json_path
+        return str(json_path)
 
     def parse(self, json_path: str) -> TariffTable:
         """
@@ -59,17 +66,25 @@ class TariffTableSource(Source):
 
         return TariffTable(chapter_number=chapter_num, rows=rows)
 
-    def save(self, tables: list[TariffTable], filepath: str = None):
-        """
-        Save a list of TariffTable objects into one JSON file.
+    def save(self, tables: list[TariffTable], filepath: str = None, version: str = None):
+        # default values
+        version = version or date.today().isoformat()
+        base_filename = filepath or "tariff_tables_all"
 
-        Args:
-            tables (list[TariffTable]): List of TariffTable objects.
-            filepath (str, optional): Destination JSON file path.
-                Defaults to 'tariff_tables_all.json'.
-        """
-        if filepath is None:
-            filepath = "tariff_tables_all.json"
+        # where to store
+        data_dir = Path("data/tables")
+        data_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump([t.model_dump() for t in tables],f,ensure_ascii=False,indent=2)
+        # paths
+        versioned_path = data_dir / f"{base_filename}_v{version}.json"
+        latest_path = data_dir / f"{base_filename}_latest.json"
+
+        # convert to list of dicts
+        payload = [t.model_dump() for t in tables]
+
+        # write both files
+        text = json.dumps(payload, indent=2, ensure_ascii=False)
+        versioned_path.write_text(text, encoding="utf-8")
+        latest_path.write_text(text, encoding="utf-8")
+
+        return str(versioned_path)
