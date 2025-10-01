@@ -98,45 +98,27 @@ class GeneralNotesSource(Source):
 
     # Parse
     def parse(self, pdf_path: str, note_num: int) -> GeneralNote:
-        """
-        Parse one General Note PDF into a `GeneralNote` object.
-
-        Scans line by line for a more robust approach to inconsistent layouts
-        (e.g., titles on their own line or dot without space).
-
-        Args:
-            pdf_path (str): Path to the General Note PDF file.
-            note_num (int): The General Note number to parse.
-
-        Returns:
-            GeneralNote: Structured representation of the General Note.
-        """
         with pdfplumber.open(pdf_path) as pdf:
             pages = [p.extract_text() or "" for p in pdf.pages]
-
-        # Clean out headers/footers
+        # --- 1) Clean headers/footers ---
         header_re = re.compile(
             r"(harmonized tariff schedule|annotated for statistical reporting|revision\s*\d+|\bgn\s*p\.?\d+\b)",
             re.I
         )
-
         cleaned_lines = []
         for page in pages:
             for ln in page.splitlines():
                 ln = ln.strip()
-                if not ln:
+                if not ln or header_re.search(ln):
                     continue
-                if header_re.search(ln):
-                    continue
-                if re.fullmatch(r"\d+", ln):  # pure page numbers
+                if re.fullmatch(r"\d+", ln):  # skip page numbers
                     continue
                 cleaned_lines.append(ln)
 
-        # Now find where this note begins
+        # --- 2) Locate note start ---
         note_start_idx = None
-        note_pattern = re.compile(rf"^(General\s+Note\s*)?{note_num}[\.\)]?\b", re.I)
         for i, ln in enumerate(cleaned_lines):
-            if note_pattern.match(ln):
+            if re.search(rf"{note_num}", ln):
                 note_start_idx = i
                 break
         if note_start_idx is None:
@@ -144,44 +126,41 @@ class GeneralNotesSource(Source):
 
         note_lines = cleaned_lines[note_start_idx:]
 
-        # Strip the leading "General Note {n}" or "{n}" from the first line
-        first_line = re.sub(
-            rf"^(General\s+Note\s*)?{note_num}[\.\)]?\s*", "", note_lines[0], flags=re.I
-        ).strip()
+        # --- 3) Find the actual title ---
+        title_line = None
+        body_start_idx = 0
 
-        # If first line is now empty, take the next non-empty line as part of the title
-        if not first_line and len(note_lines) > 1:
-            first_line = note_lines[1].strip()
-            rest_lines = note_lines[2:]
+        for i, ln in enumerate(note_lines):
+            ln_clean = re.sub(
+                rf"^(?:General\s+Notes?\s*)?{note_num}[\.\)]?\s*", "", ln, flags=re.I
+            ).strip()
+            if ln_clean and not re.match(r"^General\s+Notes?$", ln_clean, re.I):
+                title_line = ln_clean
+                body_start_idx = i + 1
+                break
+
+        if title_line is None:
+            title_line = ""
+            body_start_idx = 1
+
+        # --- 4) Split title at first '.' or ')' ---
+        m_split = re.match(r"^(.*?[\.\)])\s*(.*)$", title_line)
+        if m_split:
+            title = m_split.group(1).strip()
+            # Everything after the first dot/parenthesis goes to the body
+            body_lines = [m_split.group(2).strip()] + note_lines[body_start_idx:]
         else:
-            rest_lines = note_lines[1:]
+            title = title_line
+            body_lines = note_lines[body_start_idx:]
 
-        # If first_line doesn’t contain '.' or ')', try concatenating next line to form full title
-        if not re.search(r"[.)]", first_line) and rest_lines:
-            combined = first_line + " " + rest_lines[0]
-            if re.search(r"[.)]", combined):
-                first_line = combined
-                rest_lines = rest_lines[1:]
+        # --- 5) Build body ---
+        body_lines = [ln for ln in body_lines if not re.match(r"^General\s+Notes?$", ln, re.I)]
 
-        # Split at '.' or ')' for title vs body_start
-        mtitle = re.match(r"(?P<title>.+?)[\.)]\s*(?P<rest>.*)", first_line)
-        if mtitle:
-            title = mtitle.group("title").strip()
-            body_start = mtitle.group("rest").strip()
-        else:
-            title = first_line.strip()
-            body_start = ""
-
-        body_lines = []
-        if body_start:
-            body_lines.append(body_start)
-        body_lines.extend(rest_lines)
-
-        body = re.sub(r"\s+", " ", " ".join(body_lines)).strip()
+        body = " ".join(body_lines)
+        body = re.sub(r"\s*\n\s*", " ", body)
+        body = re.sub(r"\s+", " ", body).strip()
         title = re.sub(r"\s+", " ", title).strip()
-
         return GeneralNote(note_number=str(note_num), title=title, text=body)
-
 
     # Save
     def save(self, data: GeneralNote | list[GeneralNote], filepath: str = None, version: str = None):
