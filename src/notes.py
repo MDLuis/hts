@@ -244,32 +244,55 @@ class ChapterNotesSource(Source):
 
         Skips anything before 'CHAPTER X' to avoid section notes.
         Stops at Additional U.S. Notes, Subheading Notes, Statistical Notes,
-        or table headers.
-
-        Args:
-            pdf_path (str): Path to the Chapter PDF file.
-
-        Returns:
-            ChapterNote: Structured representation of the chapter notes.
+        or table headers. Automatically removes repeated headers/footers.
         """
-        # 1. Read all text
-        text = ""
+        # 1. Read all text, page by page
+        lines_per_page = []
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                t = page.extract_text()
+                bbox = (0, 50, page.width, page.height - 50)
+                t = page.within_bbox(bbox).extract_text()
                 if t:
-                    text += t + "\n"
+                    lines_per_page.append(t.split("\n"))
 
-        # 2. Detect chapter number
-        m_chapter = re.search(r"CHAPTER\s+(\d+)", text, re.I)
+        if not lines_per_page:
+            return ChapterNote(chapter_number="?", notes=[])
+
+        # 2. Detect repeated first and last lines manually
+        def find_repeated(lines_list):
+            repeated = []
+            checked = set()
+            for line in lines_list:
+                if line in checked:
+                    continue
+                count = sum(1 for l in lines_list if l == line)
+                if count > 1:
+                    repeated.append(line)
+                checked.add(line)
+            return repeated
+
+        first_lines = [lines[0] for lines in lines_per_page if lines]
+        last_lines = [lines[-1] for lines in lines_per_page if lines]
+
+        header_candidates = find_repeated(first_lines)
+        footer_candidates = find_repeated(last_lines)
+
+        # 3. Combine lines into clean text, removing headers/footers
+        clean_text = ""
+        for lines in lines_per_page:
+            lines = [line for line in lines if line not in header_candidates + footer_candidates]
+            clean_text += "\n".join(lines) + "\n"
+
+        # 4. Detect chapter number
+        m_chapter = re.search(r"CHAPTER\s+(\d+)", clean_text, re.I)
         if not m_chapter:
             return ChapterNote(chapter_number="?", notes=[])
         chapter_number = m_chapter.group(1)
 
-        # 3. Trim everything before "CHAPTER X"
-        text_after_chapter = text[m_chapter.start():]
+        # 5. Trim everything before "CHAPTER X"
+        text_after_chapter = clean_text[m_chapter.start():]
 
-        # 4. Find notes block, stop at any known marker or table header
+        # 6. Find notes block
         m_notes_block = re.search(
             r"Notes?\s*(.*?)(?=(?:\nAdditional\s+U\.S\.|\nSubheading\s+Notes|\nStatistical\s+Notes|\nHeading/|\nRates\s+of\s+Duty|\Z))",
             text_after_chapter,
@@ -280,7 +303,7 @@ class ChapterNotesSource(Source):
 
         notes_block = m_notes_block.group(1)
 
-        # 5. Extract numbered notes as Note objects
+        # 7. Extract numbered notes
         note_pattern = re.compile(
             r"(\d+)\.\s*(.*?)(?=(?:\n\d+\.)|(?:\nAdditional\s+U\.S\.)|(?:\nSubheading\s+Notes)|(?:\nStatistical\s+Notes)|(?:\nHeading/)|(?:\nRates\s+of\s+Duty)|\Z)",
             re.S | re.I
@@ -293,11 +316,16 @@ class ChapterNotesSource(Source):
                 r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes|Statistical\s+Notes|Additional\s+U\.S\.)",
                 raw_text, 1, flags=re.I
             )
-            clean_text = cut[0].strip()
+            clean_note = cut[0].strip()
+            # Remove any leftover headers/footers inside the note
+            for header in header_candidates + footer_candidates:
+                clean_note = clean_note.replace(header, "")
+            # Remove extra newlines
+            clean_note = re.sub(r"\n+", " ", clean_note).strip()
             notes.append(
                 Note(
                     note_number=match.group(1),
-                    text=clean_text
+                    text=clean_note
                 )
             )
 
