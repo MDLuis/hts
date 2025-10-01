@@ -8,31 +8,31 @@ def main():
     # sections = source.parse(pdf_path)
     # source.save(sections)
 
-    # Testing for general notes
-    note_num = 1
-    listNotes = []
-    src = GeneralNotesSource()
-    while note_num <= 9:
-        if note_num == 19:
-            note_num=25
-        pdf_path = src.fetch(note_num=note_num)
-        notes = src.parse(pdf_path, note_num=note_num)
-        listNotes.append(notes)
-        print(note_num, "=>", repr(notes.title))
-        note_num += 1
-    src.save(listNotes)
+    # # Testing for general notes
+    # note_num = 1
+    # listNotes = []
+    # src = GeneralNotesSource()
+    # while note_num <= 9:
+    #     if note_num == 19:
+    #         note_num=25
+    #     pdf_path = src.fetch(note_num=note_num)
+    #     notes = src.parse(pdf_path, note_num=note_num)
+    #     listNotes.append(notes)
+    #     print(note_num, "=>", repr(notes.title))
+    #     note_num += 1
+    # src.save(listNotes)
 
-    # # Testing for section notes
-    # src = SectionNotesSource()
+    # Testing for section notes
+    src = SectionNotesSource()
    
-    # sections_to_fetch = [1,6,15,16,25,28,39,41,44,47,50,64,68,71,72,84,86,90,93,94,97,98]
-    # all_sections = []
-    # for chapter_num in sections_to_fetch:
-    #     pdf_path = src.fetch(chapter_num)
-    #     section_notes = src.parse(pdf_path)
-    #     if section_notes.notes:  # skip empty ones
-    #         all_sections.append(section_notes)
-    # src.save(all_sections)
+    sections_to_fetch = [1,2,3,5,6,15,16]
+    all_sections = []
+    for chapter_num in sections_to_fetch:
+        pdf_path = src.fetch(chapter_num)
+        section_notes = src.parse(pdf_path)
+        if section_notes:  # skip empty ones
+            all_sections.append(section_notes)
+    src.save(all_sections)
 
     # # Testing for chapter notes
     # src = ChapterNotesSource()

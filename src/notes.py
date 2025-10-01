@@ -178,53 +178,53 @@ class SectionNotesSource(Source):
     def parse(self, pdf_path: str) -> Optional[SectionNote]:
         """
         Extracts section notes from the PDF, automatically detecting the section number.
-
-        Args:
-            pdf_path (str): Path to the Section Note PDF file.
-
-        Returns:
-            SectionNote | None: Structured representation of the section note, 
-            or None if no section notes are found.
+        Stops parsing if the beginning of the document doesn't mention a section.
         """
+        # Extract all text from the PDF
         text = ""
         with pdfplumber.open(pdf_path) as pdf:
+            if not pdf.pages:
+                return None
+
             for page in pdf.pages:
                 t = page.extract_text()
                 if t:
                     text += t + "\n"
 
-        # Detect section header
-        m_section = re.search(r"SECTION\s+([IVXLCDM]+)", text, re.I)
-        if not m_section:
-            # No section header at all, skip
-            return None
-        section_number = m_section.group(1)
+            # Normalize whitespace
+            text = re.sub(r"\r\n?", " ", text)
+            text = re.sub(r"\n+", " ", text).strip()
 
-        # Grab only the block between SECTION and next big header (Subheading or Additional)
+        # Check the beginning of the document for SECTION header
+        beginning_snippet = text[:200]
+        m_begin_section = re.search(r"SECTION\s+([IVXLCDM]+)", beginning_snippet, re.I)
+        if not m_begin_section:
+            # No section at the start = skip parsing
+            return None
+
+        section_number = m_begin_section.group(1)
+
+        # Grab the block between SECTION and next big header or footer
         m_clip = re.search(
-            rf"(SECTION\s+{section_number}.*?)(?=(Subheading\s+Notes|Additional\s+U\.S\.|CHAPTER\s+\d+))",
+            rf"(SECTION\s+{section_number}.*?)(?=(Subheading\s+Notes|Additional\s+U\.S\.|CHAPTER\s+\d+|Harmonized Tariff Schedule of the United States))",
             text,
             re.S | re.I,
         )
         section_text = m_clip.group(1) if m_clip else ""
 
-        # Find numbered notes inside that block
-        note_pattern = re.compile(r"Notes?\s*(\d+)\.\s*(.*?)(?=(?:\n\d+\.)|\Z)", re.S | re.I)
+        # Extract all numbered notes
+        note_pattern = re.compile(r"(\d+)\.\s*(.*?)(?=(\d+\.|$))", re.S)
         notes: list[Note] = []
         for match in note_pattern.finditer(section_text):
-            notes.append(
-                Note(
-                    note_number=match.group(1),
-                    text=match.group(2).strip()
-                )
-            )
+            note_number = match.group(1)
+            note_text = match.group(2).strip()
+            if note_text:
+                notes.append(Note(note_number=note_number, text=note_text))
 
-        if not notes:  # no actual notes found
+        if not notes:
             return None
 
         return SectionNote(section_number=section_number, notes=notes)
-
-
 
     def save(self, data: list[SectionNote], filepath: str = None, version: str = None):
         base_filename = filepath or "section_notes"

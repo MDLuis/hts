@@ -10,17 +10,17 @@
 
 ---
 
-## Section Notes
+## Section Notes (Fixed)
 - Only the **first note** is saved if multiple notes exist.  
 - **Impact:** Missing content, lowers completeness score significantly.  
 
 ---
 
-## General Notes
-- Sometimes he number and “General Notes” are concatenated into the title.  
+## General Notes (Fixed)
+- Sometimes the number and “General Notes” are concatenated into the title.  
 
 ---
 
-## Additional Notes
+## Additional Notes (Working on)
 - Footnote text sometimes gets parsed as part of the note.  
 - **Impact:** Creates validation errors.  
