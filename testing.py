@@ -12,7 +12,7 @@ def main():
     # note_num = 1
     # listNotes = []
     # src = GeneralNotesSource()
-    # while note_num <= 36:
+    # while note_num <= 9:
     #     if note_num == 19:
     #         note_num=25
     #     pdf_path = src.fetch(note_num=note_num)
@@ -25,48 +25,47 @@ def main():
     # # Testing for section notes
     # src = SectionNotesSource()
    
-    # sections_to_fetch = [1,6,15,16,25,28,39,41,44,47,50,64,68,71,72,84,86,90,93,94,97,98]
+    # sections_to_fetch = [1,2,3,5,6,15,16]
     # all_sections = []
     # for chapter_num in sections_to_fetch:
     #     pdf_path = src.fetch(chapter_num)
     #     section_notes = src.parse(pdf_path)
-    #     if section_notes.notes:  # skip empty ones
+    #     if section_notes:  # skip empty ones
     #         all_sections.append(section_notes)
     # src.save(all_sections)
 
     # # Testing for chapter notes
     # src = ChapterNotesSource()
-    # chapters = [1, 2, 6, 15, 16]  # testing  a few of them
     # results = []
-    # for ch in chapters:
+    # for ch in range(1,10):
     #     pdf_path = src.fetch(ch)
     #     chapter_notes = src.parse(pdf_path)
     #     results.append(chapter_notes)
     #     print(f"Chapter {chapter_notes.chapter_number} has {len(chapter_notes.notes)} notes")
     # src.save(results)
 
-    # # Testing for additional notes
-    # src = AdditionalUSNotesSource()
-    # results = []
-    # for ch in range(1,10):
-    #     if ch != 77:
-    #         pdf_path = src.fetch(ch)
-    #         additional_notes = src.parse(pdf_path)
-    #         if additional_notes:
-    #             results.append(additional_notes)
-    #             print(f"Chapter {additional_notes.chapter_number} has {len(additional_notes.notes)} notes")
-    #         else:
-    #             print(f"No additional u.s. notes in chapter {ch}")
-    # src.save(results)
-
-    # Testing for tariff tables
-    src = TariffTableSource()
+    # Testing for additional notes  body = re.sub(r"\n+", " ", body).strip()
+    src = AdditionalUSNotesSource()
     results = []
-    for ch in range(1, 5): 
-        path = src.fetch(ch)
-        tariff_table = src.parse(path)
-        results.append(tariff_table)
+    for ch in range(1,10):
+        if ch != 77:
+            pdf_path = src.fetch(ch)
+            additional_notes = src.parse(pdf_path)
+            if additional_notes:
+                results.append(additional_notes)
+                print(f"Chapter {additional_notes.chapter_number} has {len(additional_notes.notes)} notes")
+            else:
+                print(f"No additional u.s. notes in chapter {ch}")
     src.save(results)
+
+    # # Testing for tariff tables
+    # src = TariffTableSource()
+    # results = []
+    # for ch in range(1, 5): 
+    #     path = src.fetch(ch)
+    #     tariff_table = src.parse(path)
+    #     results.append(tariff_table)
+    # src.save(results)
 
 
 if __name__ == "__main__":

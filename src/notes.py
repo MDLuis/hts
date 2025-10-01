@@ -98,45 +98,27 @@ class GeneralNotesSource(Source):
 
     # Parse
     def parse(self, pdf_path: str, note_num: int) -> GeneralNote:
-        """
-        Parse one General Note PDF into a `GeneralNote` object.
-
-        Scans line by line for a more robust approach to inconsistent layouts
-        (e.g., titles on their own line or dot without space).
-
-        Args:
-            pdf_path (str): Path to the General Note PDF file.
-            note_num (int): The General Note number to parse.
-
-        Returns:
-            GeneralNote: Structured representation of the General Note.
-        """
         with pdfplumber.open(pdf_path) as pdf:
             pages = [p.extract_text() or "" for p in pdf.pages]
-
-        # Clean out headers/footers
+        # --- 1) Clean headers/footers ---
         header_re = re.compile(
             r"(harmonized tariff schedule|annotated for statistical reporting|revision\s*\d+|\bgn\s*p\.?\d+\b)",
             re.I
         )
-
         cleaned_lines = []
         for page in pages:
             for ln in page.splitlines():
                 ln = ln.strip()
-                if not ln:
+                if not ln or header_re.search(ln):
                     continue
-                if header_re.search(ln):
-                    continue
-                if re.fullmatch(r"\d+", ln):  # pure page numbers
+                if re.fullmatch(r"\d+", ln):  # skip page numbers
                     continue
                 cleaned_lines.append(ln)
 
-        # Now find where this note begins
+        # --- 2) Locate note start ---
         note_start_idx = None
-        note_pattern = re.compile(rf"^(General\s+Note\s*)?{note_num}[\.\)]?\b", re.I)
         for i, ln in enumerate(cleaned_lines):
-            if note_pattern.match(ln):
+            if re.search(rf"{note_num}", ln):
                 note_start_idx = i
                 break
         if note_start_idx is None:
@@ -144,44 +126,41 @@ class GeneralNotesSource(Source):
 
         note_lines = cleaned_lines[note_start_idx:]
 
-        # Strip the leading "General Note {n}" or "{n}" from the first line
-        first_line = re.sub(
-            rf"^(General\s+Note\s*)?{note_num}[\.\)]?\s*", "", note_lines[0], flags=re.I
-        ).strip()
+        # --- 3) Find the actual title ---
+        title_line = None
+        body_start_idx = 0
 
-        # If first line is now empty, take the next non-empty line as part of the title
-        if not first_line and len(note_lines) > 1:
-            first_line = note_lines[1].strip()
-            rest_lines = note_lines[2:]
+        for i, ln in enumerate(note_lines):
+            ln_clean = re.sub(
+                rf"^(?:General\s+Notes?\s*)?{note_num}[\.\)]?\s*", "", ln, flags=re.I
+            ).strip()
+            if ln_clean and not re.match(r"^General\s+Notes?$", ln_clean, re.I):
+                title_line = ln_clean
+                body_start_idx = i + 1
+                break
+
+        if title_line is None:
+            title_line = ""
+            body_start_idx = 1
+
+        # --- 4) Split title at first '.' or ')' ---
+        m_split = re.match(r"^(.*?[\.\)])\s*(.*)$", title_line)
+        if m_split:
+            title = m_split.group(1).strip()
+            # Everything after the first dot/parenthesis goes to the body
+            body_lines = [m_split.group(2).strip()] + note_lines[body_start_idx:]
         else:
-            rest_lines = note_lines[1:]
+            title = title_line
+            body_lines = note_lines[body_start_idx:]
 
-        # If first_line doesn’t contain '.' or ')', try concatenating next line to form full title
-        if not re.search(r"[.)]", first_line) and rest_lines:
-            combined = first_line + " " + rest_lines[0]
-            if re.search(r"[.)]", combined):
-                first_line = combined
-                rest_lines = rest_lines[1:]
+        # --- 5) Build body ---
+        body_lines = [ln for ln in body_lines if not re.match(r"^General\s+Notes?$", ln, re.I)]
 
-        # Split at '.' or ')' for title vs body_start
-        mtitle = re.match(r"(?P<title>.+?)[\.)]\s*(?P<rest>.*)", first_line)
-        if mtitle:
-            title = mtitle.group("title").strip()
-            body_start = mtitle.group("rest").strip()
-        else:
-            title = first_line.strip()
-            body_start = ""
-
-        body_lines = []
-        if body_start:
-            body_lines.append(body_start)
-        body_lines.extend(rest_lines)
-
-        body = re.sub(r"\s+", " ", " ".join(body_lines)).strip()
+        body = " ".join(body_lines)
+        body = re.sub(r"\s*\n\s*", " ", body)
+        body = re.sub(r"\s+", " ", body).strip()
         title = re.sub(r"\s+", " ", title).strip()
-
         return GeneralNote(note_number=str(note_num), title=title, text=body)
-
 
     # Save
     def save(self, data: GeneralNote | list[GeneralNote], filepath: str = None, version: str = None):
@@ -199,53 +178,53 @@ class SectionNotesSource(Source):
     def parse(self, pdf_path: str) -> Optional[SectionNote]:
         """
         Extracts section notes from the PDF, automatically detecting the section number.
-
-        Args:
-            pdf_path (str): Path to the Section Note PDF file.
-
-        Returns:
-            SectionNote | None: Structured representation of the section note, 
-            or None if no section notes are found.
+        Stops parsing if the beginning of the document doesn't mention a section.
         """
+        # Extract all text from the PDF
         text = ""
         with pdfplumber.open(pdf_path) as pdf:
+            if not pdf.pages:
+                return None
+
             for page in pdf.pages:
                 t = page.extract_text()
                 if t:
                     text += t + "\n"
 
-        # Detect section header
-        m_section = re.search(r"SECTION\s+([IVXLCDM]+)", text, re.I)
-        if not m_section:
-            # No section header at all, skip
-            return None
-        section_number = m_section.group(1)
+            # Normalize whitespace
+            text = re.sub(r"\r\n?", " ", text)
+            text = re.sub(r"\n+", " ", text).strip()
 
-        # Grab only the block between SECTION and next big header (Subheading or Additional)
+        # Check the beginning of the document for SECTION header
+        beginning_snippet = text[:200]
+        m_begin_section = re.search(r"SECTION\s+([IVXLCDM]+)", beginning_snippet, re.I)
+        if not m_begin_section:
+            # No section at the start = skip parsing
+            return None
+
+        section_number = m_begin_section.group(1)
+
+        # Grab the block between SECTION and next big header or footer
         m_clip = re.search(
-            rf"(SECTION\s+{section_number}.*?)(?=(Subheading\s+Notes|Additional\s+U\.S\.|CHAPTER\s+\d+))",
+            rf"(SECTION\s+{section_number}.*?)(?=(Subheading\s+Notes|Additional\s+U\.S\.|CHAPTER\s+\d+|Harmonized Tariff Schedule of the United States))",
             text,
             re.S | re.I,
         )
         section_text = m_clip.group(1) if m_clip else ""
 
-        # Find numbered notes inside that block
-        note_pattern = re.compile(r"Notes?\s*(\d+)\.\s*(.*?)(?=(?:\n\d+\.)|\Z)", re.S | re.I)
+        # Extract all numbered notes
+        note_pattern = re.compile(r"(\d+)\.\s*(.*?)(?=(\d+\.|$))", re.S)
         notes: list[Note] = []
         for match in note_pattern.finditer(section_text):
-            notes.append(
-                Note(
-                    note_number=match.group(1),
-                    text=match.group(2).strip()
-                )
-            )
+            note_number = match.group(1)
+            note_text = match.group(2).strip()
+            if note_text:
+                notes.append(Note(note_number=note_number, text=note_text))
 
-        if not notes:  # no actual notes found
+        if not notes:
             return None
 
         return SectionNote(section_number=section_number, notes=notes)
-
-
 
     def save(self, data: list[SectionNote], filepath: str = None, version: str = None):
         base_filename = filepath or "section_notes"
@@ -265,32 +244,55 @@ class ChapterNotesSource(Source):
 
         Skips anything before 'CHAPTER X' to avoid section notes.
         Stops at Additional U.S. Notes, Subheading Notes, Statistical Notes,
-        or table headers.
-
-        Args:
-            pdf_path (str): Path to the Chapter PDF file.
-
-        Returns:
-            ChapterNote: Structured representation of the chapter notes.
+        or table headers. Automatically removes repeated headers/footers.
         """
-        # 1. Read all text
-        text = ""
+        # 1. Read all text, page by page
+        lines_per_page = []
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                t = page.extract_text()
+                bbox = (0, 50, page.width, page.height - 50)
+                t = page.within_bbox(bbox).extract_text()
                 if t:
-                    text += t + "\n"
+                    lines_per_page.append(t.split("\n"))
 
-        # 2. Detect chapter number
-        m_chapter = re.search(r"CHAPTER\s+(\d+)", text, re.I)
+        if not lines_per_page:
+            return ChapterNote(chapter_number="?", notes=[])
+
+        # 2. Detect repeated first and last lines manually
+        def find_repeated(lines_list):
+            repeated = []
+            checked = set()
+            for line in lines_list:
+                if line in checked:
+                    continue
+                count = sum(1 for l in lines_list if l == line)
+                if count > 1:
+                    repeated.append(line)
+                checked.add(line)
+            return repeated
+
+        first_lines = [lines[0] for lines in lines_per_page if lines]
+        last_lines = [lines[-1] for lines in lines_per_page if lines]
+
+        header_candidates = find_repeated(first_lines)
+        footer_candidates = find_repeated(last_lines)
+
+        # 3. Combine lines into clean text, removing headers/footers
+        clean_text = ""
+        for lines in lines_per_page:
+            lines = [line for line in lines if line not in header_candidates + footer_candidates]
+            clean_text += "\n".join(lines) + "\n"
+
+        # 4. Detect chapter number
+        m_chapter = re.search(r"CHAPTER\s+(\d+)", clean_text, re.I)
         if not m_chapter:
             return ChapterNote(chapter_number="?", notes=[])
         chapter_number = m_chapter.group(1)
 
-        # 3. Trim everything before "CHAPTER X"
-        text_after_chapter = text[m_chapter.start():]
+        # 5. Trim everything before "CHAPTER X"
+        text_after_chapter = clean_text[m_chapter.start():]
 
-        # 4. Find notes block, stop at any known marker or table header
+        # 6. Find notes block
         m_notes_block = re.search(
             r"Notes?\s*(.*?)(?=(?:\nAdditional\s+U\.S\.|\nSubheading\s+Notes|\nStatistical\s+Notes|\nHeading/|\nRates\s+of\s+Duty|\Z))",
             text_after_chapter,
@@ -301,7 +303,7 @@ class ChapterNotesSource(Source):
 
         notes_block = m_notes_block.group(1)
 
-        # 5. Extract numbered notes as Note objects
+        # 7. Extract numbered notes
         note_pattern = re.compile(
             r"(\d+)\.\s*(.*?)(?=(?:\n\d+\.)|(?:\nAdditional\s+U\.S\.)|(?:\nSubheading\s+Notes)|(?:\nStatistical\s+Notes)|(?:\nHeading/)|(?:\nRates\s+of\s+Duty)|\Z)",
             re.S | re.I
@@ -314,11 +316,16 @@ class ChapterNotesSource(Source):
                 r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes|Statistical\s+Notes|Additional\s+U\.S\.)",
                 raw_text, 1, flags=re.I
             )
-            clean_text = cut[0].strip()
+            clean_note = cut[0].strip()
+            # Remove any leftover headers/footers inside the note
+            for header in header_candidates + footer_candidates:
+                clean_note = clean_note.replace(header, "")
+            # Remove extra newlines
+            clean_note = re.sub(r"\n+", " ", clean_note).strip()
             notes.append(
                 Note(
                     note_number=match.group(1),
-                    text=clean_text
+                    text=clean_note
                 )
             )
 
@@ -357,8 +364,12 @@ class AdditionalUSNotesSource(Source):
         text = ""
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                t = page.extract_text()
+                # crop margins to avoid headers/footers
+                bbox = (0, 50, page.width,page.height)
+                t = page.within_bbox(bbox).extract_text()
                 if t:
+                    t = re.sub(r"Additional U\.S\. Notes \(con\.\)", "", t)
+                    t = re.sub(r"Additional U\.S\. Notes: \(con\.\)", "", t)
                     text += t + "\n"
 
         # 2) detect chapter number
@@ -377,7 +388,7 @@ class AdditionalUSNotesSource(Source):
         # slice text after the heading
         text_after = text[idx + len(heading):]
 
-        # 4) stop at next known section/table markers (case-insensitive for markers)
+        # 4) stop at next known section/table markers
         stop_re = re.compile(r"(?=\n(Subheading\s+Notes?|Statistical\s+Notes?|Heading/|Rates\s+of\s+Duty|\Z))", re.I)
         m_stop = stop_re.search(text_after)
         if m_stop:
@@ -385,29 +396,31 @@ class AdditionalUSNotesSource(Source):
         else:
             notes_block = text_after
 
-        # 5) Normalize line breaks a bit
-        #    Keep line breaks so we can split on line-started note numbers, but normalize multiple blank lines.
+        # 5) Normalize line breaks
         notes_block = re.sub(r"\r\n?", "\n", notes_block)
         notes_block = re.sub(r"\n{2,}", "\n\n", notes_block)
 
-        # 6) Split into note-parts by looking for a newline followed by:
-        #    optional whitespace, 1-3 digits, dot, whitespace  -> this avoids HS codes like 1701.91.44
-        parts = re.split(r"\n(?=\s*\d{1,3}\.\s)", notes_block, flags=re.M)
+        # 6) Split into note parts
+        parts = re.split(r"\n(?=\s*\d{1,3}\.(?!\d|[-–])\s)", notes_block, flags=re.M)
 
         notes = []
-        note_re = re.compile(r"^\s*(\d{1,3})\.\s*(.*)", re.S | re.M)
+        note_re = re.compile(r"^\s*(\d{1,3})\.(?!\d|[-–])\s*(.*)", re.S | re.M)
         for part in parts:
             part = part.strip()
             if not part:
                 continue
             m = note_re.match(part)
             if not m:
-                # skip fragments that don't look like "N. text"
                 continue
             number = m.group(1)
             body = m.group(2).strip()
-            # Final safety cut: remove any trailing table markers accidentally included
-            body = re.split(r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)", body, 1, flags=re.I)[0].strip()
+            body = re.sub(r"\n+", " ", body).strip()
+            # Remove any trailing table markers accidentally included
+            body = re.split(r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)",
+                            body, 1, flags=re.I)[0].strip()
+            # Remove "N-N" fragments inside the body (keeps rest of text)
+            body = re.sub(r"\b\d+\s*[-–]\s*\d+\b", "", body)
+
             notes.append(Note(note_number=number, text=body))
         if not notes:
             return None
