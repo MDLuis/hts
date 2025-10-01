@@ -364,8 +364,12 @@ class AdditionalUSNotesSource(Source):
         text = ""
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                t = page.extract_text()
+                # crop margins to avoid headers/footers
+                bbox = (0, 50, page.width,page.height)
+                t = page.within_bbox(bbox).extract_text()
                 if t:
+                    t = re.sub(r"Additional U\.S\. Notes \(con\.\)", "", t)
+                    t = re.sub(r"Additional U\.S\. Notes: \(con\.\)", "", t)
                     text += t + "\n"
 
         # 2) detect chapter number
@@ -384,7 +388,7 @@ class AdditionalUSNotesSource(Source):
         # slice text after the heading
         text_after = text[idx + len(heading):]
 
-        # 4) stop at next known section/table markers (case-insensitive for markers)
+        # 4) stop at next known section/table markers
         stop_re = re.compile(r"(?=\n(Subheading\s+Notes?|Statistical\s+Notes?|Heading/|Rates\s+of\s+Duty|\Z))", re.I)
         m_stop = stop_re.search(text_after)
         if m_stop:
@@ -392,29 +396,31 @@ class AdditionalUSNotesSource(Source):
         else:
             notes_block = text_after
 
-        # 5) Normalize line breaks a bit
-        #    Keep line breaks so we can split on line-started note numbers, but normalize multiple blank lines.
+        # 5) Normalize line breaks
         notes_block = re.sub(r"\r\n?", "\n", notes_block)
         notes_block = re.sub(r"\n{2,}", "\n\n", notes_block)
 
-        # 6) Split into note-parts by looking for a newline followed by:
-        #    optional whitespace, 1-3 digits, dot, whitespace  -> this avoids HS codes like 1701.91.44
-        parts = re.split(r"\n(?=\s*\d{1,3}\.\s)", notes_block, flags=re.M)
+        # 6) Split into note parts
+        parts = re.split(r"\n(?=\s*\d{1,3}\.(?!\d|[-–])\s)", notes_block, flags=re.M)
 
         notes = []
-        note_re = re.compile(r"^\s*(\d{1,3})\.\s*(.*)", re.S | re.M)
+        note_re = re.compile(r"^\s*(\d{1,3})\.(?!\d|[-–])\s*(.*)", re.S | re.M)
         for part in parts:
             part = part.strip()
             if not part:
                 continue
             m = note_re.match(part)
             if not m:
-                # skip fragments that don't look like "N. text"
                 continue
             number = m.group(1)
             body = m.group(2).strip()
-            # Final safety cut: remove any trailing table markers accidentally included
-            body = re.split(r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)", body, 1, flags=re.I)[0].strip()
+            body = re.sub(r"\n+", " ", body).strip()
+            # Remove any trailing table markers accidentally included
+            body = re.split(r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)",
+                            body, 1, flags=re.I)[0].strip()
+            # Remove "N-N" fragments inside the body (keeps rest of text)
+            body = re.sub(r"\b\d+\s*[-–]\s*\d+\b", "", body)
+
             notes.append(Note(note_number=number, text=body))
         if not notes:
             return None
