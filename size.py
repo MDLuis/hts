@@ -22,11 +22,11 @@ dirs = {
 # ---------- Sample chapters per cumulative structured JSON ----------
 # Used to calculate per-chapter size for projections
 sample_chapters = {
-    "General Notes": 9,
-    "Additional Notes": 9,
-    "Chapter Notes": 9,
-    "Section Notes": 2,
-    "Tables": 9
+    "General Notes": 18,
+    "Additional Notes": 15,
+    "Chapter Notes": 18,
+    "Section Notes": 3,
+    "Tables": 18
 }
 
 # ---------- Total chapters for projection ----------
