@@ -38,9 +38,13 @@ def main():
     per_stage = []         # Per-stage timing (fetch, parse, save)
     per_item_timings = {} # Per-chapter timings
 
-    # Chapters to process (can expand range for more chapters)
-    chapters = range(1, 10) 
-    # chapters = [1,1,1,1,1]  # Test of same chapter within one ingestion
+    # Chapters to process (can expand range for more chapters, chapter 77 is excluded)
+    chapters = [ch for ch in range(1, 19) if ch != 77] 
+    # General notes to process (can expand range for more chapters, chapters 19-24 are excluded)
+    gen_ch = [ch for ch in range(1, 19) if ch not in range(19, 25)]
+    # Test of same chapter within one ingestion
+    # chapters = [1,1,1,1,1]
+    # gen_ch = [1,1,1,1,1]  
 
     def benchmark_dataset(name, source, append_list, chapters, parse_ch=False):
         """
@@ -93,7 +97,7 @@ def main():
         per_stage.append((name, fetch_time, parse_time, st))
 
     # ----------------- Run benchmarks for all datasets -----------------
-    benchmark_dataset("General Notes", gen_note, listGen, chapters, parse_ch=True)
+    benchmark_dataset("General Notes", gen_note, listGen, gen_ch, parse_ch=True)
     benchmark_dataset("Section Notes", sec_note, listSec, chapters)
     benchmark_dataset("Chapter Notes", ch_note, listCh, chapters)
     benchmark_dataset("Additional U.S. Notes", us_note, listUs, chapters)
