@@ -39,7 +39,8 @@ def main():
     per_item_timings = {} # Per-chapter timings
 
     # Chapters to process (can expand range for more chapters)
-    chapters = range(1, 10)
+    chapters = range(1, 10) 
+    # chapters = [1,1,1,1,1]  # Test of same chapter within one ingestion
 
     def benchmark_dataset(name, source, append_list, chapters, parse_ch=False):
         """
