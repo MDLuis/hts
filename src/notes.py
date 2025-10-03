@@ -1,10 +1,10 @@
 from .base import Source
 from .models import GeneralNote, SectionNote, ChapterNote, Note, AdditionalUSNotes
-import requests, pdfplumber, json, re
+import pdfplumber, json, re
 from datetime import date
 from pathlib import Path
 from typing import Optional
-from .utils import get_retry
+from .utils import get_retry, deduplicate
 
 BASE_URL = "https://hts.usitc.gov/reststop/file"
 pdf_ch = Path("pdf/chapters")
@@ -165,6 +165,8 @@ class GeneralNotesSource(Source):
 
     # Save
     def save(self, data: GeneralNote | list[GeneralNote], filepath: str = None, version: str = None):
+        if data:
+            data = deduplicate(data, "note_number")
         base_filename = filepath or "general_notes"
         return versioning(data, base_filename, folder="data/notes/general", version=version)
         
@@ -228,6 +230,8 @@ class SectionNotesSource(Source):
         return SectionNote(section_number=section_number, notes=notes)
 
     def save(self, data: list[SectionNote], filepath: str = None, version: str = None):
+        if data:
+            data = deduplicate(data, "section_number")
         base_filename = filepath or "section_notes"
         return versioning(data, base_filename, folder="data/notes/section", version=version)
 
@@ -333,6 +337,8 @@ class ChapterNotesSource(Source):
         return ChapterNote(chapter_number=chapter_number, notes=notes)
 
     def save(self, data: list[ChapterNote], filepath: str = None, version: str = None):
+        if data:
+            data = deduplicate(data, "chapter_number")
         base_filename = filepath or "chapter_notes"
         return versioning(data, base_filename, folder="data/notes/chapter", version=version)
 
@@ -429,5 +435,7 @@ class AdditionalUSNotesSource(Source):
         return AdditionalUSNotes(chapter_number=chapter_number, notes=notes)
 
     def save(self, data: list[AdditionalUSNotes], filepath: str = None, version: str = None):
+        if data:
+            data = deduplicate(data, "chapter_number")
         base_filename = filepath or "additional_us_notes"
         return versioning(data, base_filename, folder="data/notes/additional", version=version)
