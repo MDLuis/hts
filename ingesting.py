@@ -39,9 +39,9 @@ def main():
     per_item_timings = {} # Per-chapter timings
 
     # Chapters to process (can expand range for more chapters, chapter 77 is excluded)
-    chapters = [ch for ch in range(1, 19) if ch != 77] 
+    chapters = [ch for ch in range(1, 10) if ch != 77] 
     # General notes to process (can expand range for more chapters, chapters 19-24 are excluded)
-    gen_ch = [ch for ch in range(1, 19) if ch not in range(19, 25)]
+    gen_ch = [ch for ch in range(1, 10) if ch not in range(19, 25)]
     # Test of same chapter within one ingestion
     # chapters = [1,1,1,1,1]
     # gen_ch = [1,1,1,1,1]  

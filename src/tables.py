@@ -3,7 +3,7 @@ from .base import Source
 from .models import TariffRow, TariffTable 
 from datetime import date
 from pathlib import Path
-
+from .utils import get_retry
 
 class TariffTableSource(Source):
     """
@@ -39,7 +39,7 @@ class TariffTableSource(Source):
             end = 9999
 
         url = f"{self.BASE_URL}?from={start:04d}&to={end:04d}&format=JSON&styles=true"
-        r = requests.get(url)
+        r = get_retry(url)
         r.raise_for_status()
 
         with open(json_path, "w", encoding="utf-8") as f:
