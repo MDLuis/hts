@@ -9,7 +9,7 @@ This repository implements an end-to-end pipeline to **download, parse, and stor
 - **Automated PDF ingestion** of HTS sections, chapters, notes, and tariff tables.
 - **Clean, structured JSON** outputs for each data type with versioned filenames.
 - **Sentence-transformers embeddings** of all texts (notes and tariff tables).
-- **Benchmarks** file to track encoding performance across datasets.
+- **Benchmarks** files to track ingesting and encoding performance across datasets.
 - **Fully OOP architecture**: each data source is represented by its own class.
 
 ---
@@ -21,6 +21,7 @@ This repository implements an end-to-end pipeline to **download, parse, and stor
 ├── ingesting.py                – Main script to fetch and parse HTS data
 ├── encoding.py                 – Script to generate embeddings from JSON files
 ├── requirements.txt            - To install libraries needed
+├── benchmarkIngest.md          – Timing results for ingesting
 ├── benchmarks.md               – Timing results for encoding
 ├── data/
 │   ├── notes/
@@ -35,7 +36,8 @@ This repository implements an end-to-end pipeline to **download, parse, and stor
     ├── ingest.py   - HTSSource
     ├── models.py   - Data models
     ├── notes.py    – GeneralNotesSource, SectionNotesSource, etc.
-    └── tables.py   – TariffTableSource
+    ├── tables.py   – TariffTableSource    
+    └── utils.py    - Helper functions for deduplication and retry
 ```
 
 ---
@@ -54,6 +56,16 @@ Each implements:
 - `fetch(...)` – download the corresponding PDF or JSON file.
 - `parse(pdf_path)` – extract structured text from the PDF or JSON file.
 - `save(data, filepath, version)` – store JSON with version and latest copies.
+
+---
+
+## Utilities
+
+The repo also includes helper functions in `utils.py`:
+
+- `get_retry(url, ...)` – download with automatic retries and exponential backoff.
+
+- `deduplicate(data_list, key_attr)` – remove duplicate objects by attribute.
 
 ---
 
@@ -108,10 +120,28 @@ This ensures reproducibility and a permanent record of past runs.
 
 ## Benchmarks
 
+### Encoding 
 See `benchmarks.md` for encoding performance by dataset, including:
 - Number of texts encoded
 - Model used
 - Time taken on your hardware
+
+### Ingestion
+See `benchmarkIngest.md` for ingestion performance by dataset, including:
+- Number of items processed
+- Total processing time
+- Items per second
+- Seconds per item
+- Per-stage timing (fetch, parse, save)
+- Per-chapter timing
+
+---
+
+## Testing & Reliability
+
+- **Stress Tests** (`stressTest.md`) – Shows pipeline performance on small, medium, and large ingestion runs.
+- **Robustness Evaluation** (`robustness_report.md`) – Documents idempotency, consistency, interruption handling, and retry behavior.
+- **Size Report** (`size_report.md`) – Estimates storage requirements for raw PDFs, raw JSON, and structured JSON, including projections for the full HTS dataset.
 
 ---
 
