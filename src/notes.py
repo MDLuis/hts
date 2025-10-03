@@ -4,6 +4,7 @@ import requests, pdfplumber, json, re
 from datetime import date
 from pathlib import Path
 from typing import Optional
+from .utils import get_retry
 
 BASE_URL = "https://hts.usitc.gov/reststop/file"
 pdf_ch = Path("pdf/chapters")
@@ -58,7 +59,7 @@ def download_chapter_pdf(chapter_num: int, filename: str = None) -> str:
     pdf_path.parent.mkdir(parents=True, exist_ok=True)
 
     url = f"{BASE_URL}?release=currentRelease&filename=Chapter%20{chapter_num}"
-    r = requests.get(url)
+    r = get_retry(url)
     r.raise_for_status()
 
     with open(pdf_path, "wb") as f:
@@ -89,7 +90,7 @@ class GeneralNotesSource(Source):
             "filename": f"General Note {note_num}",
             "release": "currentRelease"
         }
-        resp = requests.get(BASE_URL, params=params, stream=True)
+        resp = get_retry(BASE_URL, params=params, stream=True)
         resp.raise_for_status()
         with open(pdf_path, "wb") as f:
             for chunk in resp.iter_content(chunk_size=8192):

@@ -59,13 +59,13 @@ Focus: idempotency, consistency, interruption handling, retries, and failure mod
 - Observed retry behavior.
 
 **Observations:**  
-- Fetch failed immediately with a connection error.  
-- No retry/backoff mechanism, ingestion was aborted.  
-- When network was restored, re-running ingestion succeeded.  
-- Manual restart required.
+- Automatic retries triggered according to `retries=5` and `backoff_factor=0.5`. (Can be increased)
+- Each retry waited exponentially longer (0.5s → 1s → 2s → 4s) before the next attempt.
+- Once the network was restored within the retry window, the ingestion completed successfully without manual restart.
+- If the connection remained unavailable past the maximum retries, the ingestion aborts.
 
 **Result:**  
-**Fail** - Retry/backoff logic not implemented.
+**Pass** - Retry and backoff logic correctly handled connection failures, preventing ingestion aborts.
 
 ---
 
@@ -74,6 +74,4 @@ Focus: idempotency, consistency, interruption handling, retries, and failure mod
 | Failure Mode | When It Happens |  Recovery | 
 |--------------|-----------------|-----------|
 | Duplicate structured data | Re-ingesting the same chapter during the same run | Manual cleanup required |
-| Network fetch failure     | Retry/backoff test                                | Manual restart required |
 
----
