@@ -35,3 +35,20 @@ def get_retry(url: str, retries: int = 5, backoff_factor: float = 0.5, timeout: 
     response = session.get(url, timeout=timeout, **kwargs)
 
     return response
+
+def deduplicate(data_list, key_attr: str):
+    """
+    Deduplicate a list of objects based on a specified attribute.
+
+    Keeps the first occurrence of each unique key.
+    """
+    seen = set()
+    deduped = []
+    for item in data_list:
+        key_val = getattr(item, key_attr, None)
+        if key_val is None:
+            deduped.append(item)
+        elif key_val not in seen:
+            deduped.append(item)
+            seen.add(key_val)
+    return deduped

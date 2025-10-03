@@ -11,11 +11,11 @@ Focus: idempotency, consistency, interruption handling, retries, and failure mod
 - Ingested Chapter 1 five times within the same ingestion run.
 
 **Observations:**  
-- Duplicates created in the structured JSON file.  
+- No duplicates created in the structured JSON file.  
 - PDF files were not duplicated.
 
 **Result:**  
-**Fail** - The structured data had duplicates of the same chapter.
+**Pass** - Duplicate chapters are automatically removed before saving, ensuring the structured data remains unique.
 
 ---
 
@@ -68,10 +68,3 @@ Focus: idempotency, consistency, interruption handling, retries, and failure mod
 **Pass** - Retry and backoff logic correctly handled connection failures, preventing ingestion aborts.
 
 ---
-
-## 5. Summary of Failure Modes
-
-| Failure Mode | When It Happens |  Recovery | 
-|--------------|-----------------|-----------|
-| Duplicate structured data | Re-ingesting the same chapter during the same run | Manual cleanup required |
-

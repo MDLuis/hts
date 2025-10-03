@@ -1,9 +1,9 @@
-import json, requests, re
+import json, re
 from .base import Source  
 from .models import TariffRow, TariffTable 
 from datetime import date
 from pathlib import Path
-from .utils import get_retry
+from .utils import get_retry, deduplicate
 
 class TariffTableSource(Source):
     """
@@ -67,6 +67,8 @@ class TariffTableSource(Source):
         return TariffTable(chapter_number=chapter_num, rows=rows)
 
     def save(self, tables: list[TariffTable], filepath: str = None, version: str = None):
+        if tables:
+            tables = deduplicate(tables, "chapter_number")
         # default values
         version = version or date.today().isoformat()
         base_filename = filepath or "tariff_tables_all"
