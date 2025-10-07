@@ -299,7 +299,7 @@ class ChapterNotesSource(Source):
 
         # 6. Find notes block
         m_notes_block = re.search(
-            r"Notes?\s*(.*?)(?=(?:\nAdditional\s+U\.S\.|\nSubheading\s+Notes|\nStatistical\s+Notes|\nHeading/|\nRates\s+of\s+Duty|\Z))",
+            r"Notes?\s*(.*?)(?=(?:\nAdditional\s+U\.S\.|\nSubheading\s+Notes?|\nStatistical\s+Notes?|\nHeading/|\nRates\s+of\s+Duty|\Z))",
             text_after_chapter,
             re.S | re.I
         )
@@ -310,7 +310,7 @@ class ChapterNotesSource(Source):
 
         # 7. Extract numbered notes
         note_pattern = re.compile(
-            r"(\d+)\.\s*(.*?)(?=(?:\n\d+\.)|(?:\nAdditional\s+U\.S\.)|(?:\nSubheading\s+Notes)|(?:\nStatistical\s+Notes)|(?:\nHeading/)|(?:\nRates\s+of\s+Duty)|\Z)",
+            r"(\d{1,2})\.\s*(.*?)(?=(?:\n\d{1,2}\.)|(?:\nAdditional\s+U\.S\.)|(?:\nSubheading\s+Notes?)|(?:\nStatistical\s+Notes?)|(?:\nHeading/)|(?:\nRates\s+of\s+Duty)|\Z)",
             re.S | re.I
         )
 
@@ -318,7 +318,7 @@ class ChapterNotesSource(Source):
         for match in note_pattern.finditer(notes_block):
             raw_text = match.group(2).strip()
             cut = re.split(
-                r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes|Statistical\s+Notes|Additional\s+U\.S\.)",
+                r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)",
                 raw_text, 1, flags=re.I
             )
             clean_note = cut[0].strip()
