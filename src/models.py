@@ -1,43 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional, Any
 
-class Chapter(BaseModel):
-    """
-    Represents a single HTS chapter.
-
-    Attributes:
-        ch_number (str): The numeric identifier for the chapter.
-        title (str): The title or heading of the chapter.
-        notes (Optional[str]): Any special notes attached to the chapter.
-    """
-    ch_number: str
-    title: str
-
-class Section(BaseModel):
-    """
-    Represents a single HTS section which can contain multiple chapters.
-
-    Attributes:
-        sec_number (str): The numeric identifier for the section.
-        title (str): The title or heading of the section.
-        chapters (List[Chapter]): A list of chapters belonging to this section.
-    """
-    sec_number: str
-    title: str
-    chapters: List[Chapter]
-
-class GeneralNote(BaseModel):
-    """
-    Represents a single General Note in the Harmonized Tariff Schedule (HTS).
-    Attributes:
-        note_number (Optional[str]): The General Note number, e.g. "1" or "2".
-        title (str): Title or heading of the General Note.
-        text (str): Full text of the General Note body.
-    """
-    note_number: Optional[str]
-    title: str
-    text: str
-
 class Note(BaseModel):
     """
     Represents an individual numbered note within a section or chapter.
@@ -95,3 +58,48 @@ class TariffRow(BaseModel):
 class TariffTable(BaseModel):
     chapter_number: str
     rows: List[TariffRow]
+
+class Chapter(BaseModel):
+    """
+    Represents a single HTS chapter.
+
+    Attributes:
+        ch_number (str): The numeric identifier for the chapter.
+        title (str): The title or heading of the chapter.
+        notes (Optional[str]): Any special notes attached to the chapter.
+    """
+    ch_number: str
+    title: str
+    notes: Optional[ChapterNote] = None
+    additional: Optional[AdditionalUSNotes] = None
+    table: Optional[TariffTable] = None
+
+class Section(BaseModel):
+    """
+    Represents a single HTS section which can contain multiple chapters.
+
+    Attributes:
+        sec_number (str): The numeric identifier for the section.
+        title (str): The title or heading of the section.
+        chapters (List[Chapter]): A list of chapters belonging to this section.
+    """
+    sec_number: str
+    title: str
+    notes: Optional[SectionNote] = None
+    chapters: List[Chapter] = None
+
+class GeneralNote(BaseModel):
+    """
+    Represents a single General Note in the Harmonized Tariff Schedule (HTS).
+    Attributes:
+        note_number (Optional[str]): The General Note number, e.g. "1" or "2".
+        title (str): Title or heading of the General Note.
+        text (str): Full text of the General Note body.
+    """
+    note_number: Optional[str]
+    title: str
+    text: str
+
+class HTSData(BaseModel):
+    general_notes: List[GeneralNote]
+    sections: List[Section]
