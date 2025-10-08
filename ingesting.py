@@ -2,7 +2,7 @@ from src.notes import GeneralNotesSource, SectionNotesSource, ChapterNotesSource
 from src.tables import TariffTableSource
 import time
 from pathlib import Path
-
+from src.utils import combine
 def main():
     """
     Executes a benchmark pipeline for HTS (Harmonized Tariff Schedule) data ingestion.
@@ -39,9 +39,9 @@ def main():
     per_item_timings = {} # Per-chapter timings
 
     # Chapters to process (can expand range for more chapters, chapter 77 is excluded)
-    chapters = [ch for ch in range(1, 16) if ch != 77] 
+    chapters = [ch for ch in range(1, 10) if ch != 77] 
     # General notes to process (can expand range for more chapters, chapters 19-24 are excluded)
-    gen_ch = [ch for ch in range(1, 16) if ch not in range(19, 25)]
+    gen_ch = [ch for ch in range(1, 10) if ch not in range(19, 25)]
     # Test of same chapter within one ingestion
     # chapters = [1,1,1,1,1]
     # gen_ch = [1,1,1,1,1]  
@@ -102,7 +102,7 @@ def main():
     benchmark_dataset("Chapter Notes", ch_note, listCh, chapters)
     benchmark_dataset("Additional U.S. Notes", us_note, listUs, chapters)
     benchmark_dataset("Tariff Tables", table, listTar, chapters)
-
+    combine()
     # ----------------- Write Markdown report -----------------
     md_path = Path("benchmarkIngest.md")
     lines = [
