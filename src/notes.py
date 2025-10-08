@@ -184,21 +184,43 @@ class SectionNotesSource(Source):
         Stops parsing if the beginning of the document doesn't mention a section.
         """
         # Extract all text from the PDF
-        text = ""
+        lines_per_page = []
         with pdfplumber.open(pdf_path) as pdf:
-            if not pdf.pages:
-                return None
-
             for page in pdf.pages:
-                t = page.extract_text()
+                bbox = (0, 50, page.width, page.height - 50)
+                t = page.within_bbox(bbox).extract_text()
                 if t:
-                    text += t + "\n"
+                    lines_per_page.append(t.split("\n"))
 
-            # Normalize whitespace
-            text = re.sub(r"\r\n?", " ", text)
-            text = re.sub(r"\n+", " ", text).strip()
+        if not lines_per_page:
+            return SectionNote(section_number="?", notes=[])
 
-        # Check the beginning of the document for SECTION header
+        # ---- Step 2: Detect headers/footers ----
+        def find_repeated(lines_list):
+            repeated = []
+            checked = set()
+            for line in lines_list:
+                if line in checked:
+                    continue
+                count = sum(1 for l in lines_list if l == line)
+                if count > 1:
+                    repeated.append(line)
+                checked.add(line)
+            return repeated
+
+        first_lines = [lines[0] for lines in lines_per_page if lines]
+        last_lines = [lines[-1] for lines in lines_per_page if lines]
+        header_candidates = find_repeated(first_lines)
+        footer_candidates = find_repeated(last_lines)
+
+        # ---- Step 3: Join cleaned lines ----
+        text = ""
+        for lines in lines_per_page:
+            lines = [l for l in lines if l not in header_candidates + footer_candidates]
+            text += "\n".join(lines) + "\n"
+        text = re.sub(r"\n+", "\n", text).strip()
+
+        # ---- Step 4: Your original SECTION header clipping ----
         beginning_snippet = text[:200]
         m_begin_section = re.search(r"SECTION\s+([IVXLCDM]+)", beginning_snippet, re.I)
         if not m_begin_section:
@@ -215,17 +237,67 @@ class SectionNotesSource(Source):
         )
         section_text = m_clip.group(1) if m_clip else ""
 
-        # Extract all numbered notes
-        note_pattern = re.compile(r"(\d+)\.\s*(.*?)(?=(\d+\.|$))", re.S)
-        notes: list[Note] = []
-        for match in note_pattern.finditer(section_text):
+        # ---- Step 5: Extract Notes block ----
+        m_notes_block = re.search(
+            r"Notes?\s*(.*?)(?=(?:\n\d{1,2}\.)|\Z)",
+            section_text,
+            re.S | re.I,
+        )
+        if not m_notes_block:
+            return SectionNote(section_number=section_number, notes=[])
+
+        notes_block = section_text[m_notes_block.start():]
+
+        # ---- Step 6: Note & sub-item parsing ----
+        note_pattern = re.compile(
+            r"(\d{1,2})\.\s*(.*?)(?=(?:\n\d{1,2}\.)|\Z)",
+            re.S
+        )
+
+        def parse_sub_items(text):
+            """
+            Parse top-level (a),(b),... and nested (i),(ii) sub-items.
+            Returns a list of strings or dicts with 'sub_items'.
+            """
+            items = []
+            text = re.sub(r"\n+", " ", text).strip()
+
+            # Match top-level items (a), (b), etc.
+            top_pattern = re.compile(r"\(([a-z])\)\s*(.*?)(?=(\([a-z]\)|$))", re.S)
+            for top_match in top_pattern.finditer(text):
+                top_letter = top_match.group(1)
+                content = top_match.group(2).strip()
+                content = re.sub(r"\n+", " ", content)
+
+                # Match nested (i),(ii), etc.
+                nested_pattern = re.compile(r"\(([ivx]+)\)\s*(.*?)(?=(\([ivx]+\)|$))", re.S)
+                nested_matches = list(nested_pattern.finditer(content))
+                if nested_matches:
+                    nested_items = []
+                    for nm in nested_matches:
+                        nm_text = re.sub(r"\n+", " ", nm.group(2)).strip()
+                        nested_items.append(f"({nm.group(1)}) {nm_text}")
+                    items.append({"sub_items": nested_items})
+                else:
+                    items.append(f"({top_letter}) {content}")
+            return items or None
+
+        notes = []
+        for match in note_pattern.finditer(notes_block):
             note_number = match.group(1)
             note_text = match.group(2).strip()
-            if note_text:
-                notes.append(Note(note_number=note_number, text=note_text))
 
-        if not notes:
-            return None
+            parts = re.split(r"(?=\([a-z]\))", note_text, 1)
+            main_text = re.sub(r"\n+", " ", parts[0]).strip()
+            sub_items = None
+            if len(parts) > 1:
+                sub_items = parse_sub_items(parts[1])
+
+            notes.append(Note(
+                note_number=note_number,
+                text=main_text,
+                sub_items=sub_items
+            ))
 
         return SectionNote(section_number=section_number, notes=notes)
 
@@ -290,12 +362,10 @@ class ChapterNotesSource(Source):
 
         # 4. Detect chapter number
         m_chapter = re.search(r"CHAPTER\s+(\d+)", clean_text, re.I)
-        if not m_chapter:
-            return ChapterNote(chapter_number="?", notes=[])
-        chapter_number = m_chapter.group(1)
+        chapter_number = m_chapter.group(1) if m_chapter else "?"
 
         # 5. Trim everything before "CHAPTER X"
-        text_after_chapter = clean_text[m_chapter.start():]
+        text_after_chapter = clean_text[m_chapter.start():] if m_chapter else clean_text
 
         # 6. Find notes block
         m_notes_block = re.search(
@@ -303,12 +373,39 @@ class ChapterNotesSource(Source):
             text_after_chapter,
             re.S | re.I
         )
-        if not m_notes_block:
-            return ChapterNote(chapter_number=chapter_number, notes=[])
+        notes_block = m_notes_block.group(1) if m_notes_block else ""
 
-        notes_block = m_notes_block.group(1)
+        # 7. Helper to parse hierarchical sub-items
+        def parse_sub_items(text):
+            """Recursively parse sub-items: (a), (b), ... and nested (i), (ii), ..."""
+            items = []
+            # Top-level sub-items (a), (b), (c)…
+            top_pattern = re.compile(r"\n?\s*\(([a-z])\)\s*(.*?)((?=\n\s*\([a-z]\))|$)", re.S)
+            for top_match in top_pattern.finditer(text):
+                content = re.sub(r"\n+", " ", top_match.group(2)).strip()
+                # Check for nested (i), (ii), ...
+                nested_pattern = re.compile(r"\n?\s*\(([ivx]+)\)\s*(.*?)(?=(\n\s*\([ivx]+\))|$)", re.S | re.I)
+                nested_matches = list(nested_pattern.finditer(content))
+                if nested_matches:
+                    nested_items = []
+                    last_end = 0
+                    for nm in nested_matches:
+                        # Anything before the first nested item goes into text
+                        prefix = content[last_end:nm.start()].strip()
+                        if prefix:
+                            nested_items.append(prefix)
+                        cleaned_text = re.sub(r"\n+", " ", nm.group(2)).strip()
+                        nested_items.append(f"({nm.group(1)}) {cleaned_text}")
+                        last_end = nm.end()
+                    suffix = content[last_end:].strip()
+                    if suffix:
+                        nested_items.append(suffix)
+                    items.append({"sub_items": nested_items})
+                else:
+                    items.append(f"({top_match.group(1)}) {content}")
+            return items
 
-        # 7. Extract numbered notes
+        # 8. Extract numbered notes
         note_pattern = re.compile(
             r"(\d{1,2})\.\s*(.*?)(?=(?:\n\d{1,2}\.)|(?:\nAdditional\s+U\.S\.)|(?:\nSubheading\s+Notes?)|(?:\nStatistical\s+Notes?)|(?:\nHeading/)|(?:\nRates\s+of\s+Duty)|\Z)",
             re.S | re.I
@@ -317,20 +414,19 @@ class ChapterNotesSource(Source):
         notes: list[Note] = []
         for match in note_pattern.finditer(notes_block):
             raw_text = match.group(2).strip()
-            cut = re.split(
-                r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)",
-                raw_text, 1, flags=re.I
-            )
-            clean_note = cut[0].strip()
-            # Remove any leftover headers/footers inside the note
+            # Remove leftover headers/footers
             for header in header_candidates + footer_candidates:
-                clean_note = clean_note.replace(header, "")
-            # Remove extra newlines
-            clean_note = re.sub(r"\n+", " ", clean_note).strip()
+                raw_text = raw_text.replace(header, "")
+            raw_text = re.sub(r"\n+", "\n", raw_text).strip()
+            # Split into main text and sub-items
+            main_text_split = re.split(r"\n\s*\([a-z]\)", raw_text, 1, flags=re.I)
+            main_text = re.sub(r"\n+", " ", main_text_split[0]).strip()
+            sub_items = parse_sub_items(raw_text) if len(main_text_split) > 1 else None
             notes.append(
                 Note(
                     note_number=match.group(1),
-                    text=clean_note
+                    text=main_text,
+                    sub_items=sub_items
                 )
             )
 
@@ -398,10 +494,7 @@ class AdditionalUSNotesSource(Source):
         # 4) stop at next known section/table markers
         stop_re = re.compile(r"(?=\n(Subheading\s+Notes?|Statistical\s+Notes?|Heading/|Rates\s+of\s+Duty|\Z))", re.I)
         m_stop = stop_re.search(text_after)
-        if m_stop:
-            notes_block = text_after[:m_stop.start()]
-        else:
-            notes_block = text_after
+        notes_block = text_after[:m_stop.start()] if m_stop else text_after
 
         # 5) Normalize line breaks
         notes_block = re.sub(r"\r\n?", "\n", notes_block)
@@ -412,6 +505,7 @@ class AdditionalUSNotesSource(Source):
 
         notes = []
         note_re = re.compile(r"^\s*(\d{1,3})\.(?!\d|[-–])\s*(.*)", re.S | re.M)
+        subitem_re = re.compile(r"(\([a-z]+\)|\([ivx]+\))\s*(.*?)(?=(\([a-z]+\)|\([ivx]+\))|\Z)", re.I | re.S)
         for part in parts:
             part = part.strip()
             if not part:
@@ -421,14 +515,29 @@ class AdditionalUSNotesSource(Source):
                 continue
             number = m.group(1)
             body = m.group(2).strip()
-            body = re.sub(r"\n+", " ", body).strip()
-            # Remove any trailing table markers accidentally included
+            body = re.sub(r"\s*\n\s*", " ", body).strip()
             body = re.split(r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)",
                             body, 1, flags=re.I)[0].strip()
-            # Remove "N-N" fragments inside the body (keeps rest of text)
             body = re.sub(r"\b\d+\s*[-–]\s*\d+\b", "", body)
 
-            notes.append(Note(note_number=number, text=body))
+            # --- Extract subitems ---
+            sub_items = []
+            remaining_text = body
+            for sm in subitem_re.finditer(body):
+                sub_text = sm.group(2)
+                sub_text = re.sub(r"\s*\n\s*", " ", sub_text).strip()
+                sub_items.append(f"{sm.group(1)} {sub_text}")
+                remaining_text = remaining_text.replace(sm.group(0), "")
+
+            # main text is remaining_text without subitems
+            main_text = remaining_text.strip()
+
+            notes.append(Note(
+                note_number=number,
+                text=main_text,
+                sub_items=sub_items or None
+            ))
+
         if not notes:
             return None
 

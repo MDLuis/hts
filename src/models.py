@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Union
 
 class Note(BaseModel):
     """
@@ -10,6 +10,7 @@ class Note(BaseModel):
     """
     note_number: str
     text: str
+    sub_items:  Optional[List[Union[str, dict]]] = None
 
 class ChapterNote(BaseModel):
     """
