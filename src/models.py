@@ -100,6 +100,7 @@ class GeneralNote(BaseModel):
     note_number: Optional[str]
     title: str
     text: str
+    sub_items:  Optional[List[Union[str, dict]]] = None
 
 class HTSData(BaseModel):
     general_notes: List[GeneralNote]

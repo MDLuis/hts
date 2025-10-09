@@ -119,7 +119,7 @@ class GeneralNotesSource(Source):
         # --- 2) Locate note start ---
         note_start_idx = None
         for i, ln in enumerate(cleaned_lines):
-            if re.search(rf"{note_num}", ln):
+            if re.search(rf"\b{note_num}\b", ln):
                 note_start_idx = i
                 break
         if note_start_idx is None:
@@ -157,11 +157,52 @@ class GeneralNotesSource(Source):
         # --- 5) Build body ---
         body_lines = [ln for ln in body_lines if not re.match(r"^General\s+Notes?$", ln, re.I)]
 
-        body = " ".join(body_lines)
-        body = re.sub(r"\s*\n\s*", " ", body)
-        body = re.sub(r"\s+", " ", body).strip()
-        title = re.sub(r"\s+", " ", title).strip()
-        return GeneralNote(note_number=str(note_num), title=title, text=body)
+        # --- 6) Subitem parsing ---
+        lead_marker_re = re.compile(r"^\(([A-Za-z0-9IVXLCDM]+)\)\s*(.*)$")
+
+        def marker_level(marker: str):
+            """Assign level to markers for hierarchy"""
+            if re.match(r'^[a-hj-z]$', marker): return 1         
+            if re.match(r'^[ivxlcdm]+$', marker): return 2   
+            if re.match(r'^[A-HJ-Z]$', marker): return 3       
+            if re.match(r'^\d+$', marker): return 4         
+            if re.match(r'^[IVXLCDM]+$', marker): return 5 
+            return 0
+
+        sub_items = []
+        stack = []
+        main_text_lines = []
+
+        for raw_ln in body_lines:
+            ln = re.sub(r"\s+", " ", raw_ln).strip()
+            if not ln:
+                continue
+
+            m = lead_marker_re.match(ln)
+            if m:
+                marker, rest = m.group(1), m.group(2).strip()
+                text = f"({marker}) {rest}" if rest else f"({marker})"
+                node = {"text": text, "sub_items": []}
+                level = marker_level(marker)
+
+                while stack and marker_level(stack[-1][0]) >= level:
+                    stack.pop()
+
+                if stack:
+                    stack[-1][1]["sub_items"].append(node)
+                else:
+                    sub_items.append(node)
+
+                stack.append((marker, node))
+            else:
+                if stack:
+                    stack[-1][1]["text"] += " " + ln
+                else:
+                    main_text_lines.append(ln)
+
+        main_text = " ".join(main_text_lines).strip()
+
+        return GeneralNote( note_number=str(note_num), title=title, text=main_text, sub_items=sub_items if sub_items else None)
 
     # Save
     def save(self, data: GeneralNote | list[GeneralNote], filepath: str = None, version: str = None):
@@ -498,14 +539,21 @@ class AdditionalUSNotesSource(Source):
 
         # 5) Normalize line breaks
         notes_block = re.sub(r"\r\n?", "\n", notes_block)
-        notes_block = re.sub(r"\n{2,}", "\n\n", notes_block)
-
+        notes_block = re.sub(r"\n{3,}", "\n\n", notes_block)
+        notes_block = re.sub(r"[ \t]{2,}", " ", notes_block)
         # 6) Split into note parts
         parts = re.split(r"\n(?=\s*\d{1,3}\.(?!\d|[-–])\s)", notes_block, flags=re.M)
+        note_re = re.compile(r"^\s*(\d{1,3})\.(?!\d|[-–])\s*(.*)", re.S | re.M)
 
         notes = []
-        note_re = re.compile(r"^\s*(\d{1,3})\.(?!\d|[-–])\s*(.*)", re.S | re.M)
-        subitem_re = re.compile(r"(\([a-z]+\)|\([ivx]+\))\s*(.*?)(?=(\([a-z]+\)|\([ivx]+\))|\Z)", re.I | re.S)
+
+        # --- Subitem patterns ---
+        level_patterns = [
+            re.compile(r"^\(([a-hj-uw-z])\)"),        
+            re.compile(r"^\(([ivxlcdm]+)\)"),       
+            re.compile(r"^\((\d+)\)"),  
+            re.compile(r"^\(([A-Z])\)")           
+        ]
         for part in parts:
             part = part.strip()
             if not part:
@@ -515,26 +563,73 @@ class AdditionalUSNotesSource(Source):
                 continue
             number = m.group(1)
             body = m.group(2).strip()
-            body = re.sub(r"\s*\n\s*", " ", body).strip()
-            body = re.split(r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)",
-                            body, 1, flags=re.I)[0].strip()
-            body = re.sub(r"\b\d+\s*[-–]\s*\d+\b", "", body)
 
-            # --- Extract subitems ---
+            # Remove unrelated sections
+            body = re.split(
+                r"\n(?:Heading/|Rates\s+of\s+Duty|Subheading\s+Notes?|Statistical\s+Notes?|Additional\s+U\.S\.)",
+                body, 1, flags=re.I
+            )[0].strip()
+
+            # --- Split lines and normalize ---
+            lines = re.sub(r"[ \t]*\n[ \t]*", "\n", body).split("\n")
+
+            main_text = ""
+            sub_items_stack = []
             sub_items = []
-            remaining_text = body
-            for sm in subitem_re.finditer(body):
-                sub_text = sm.group(2)
-                sub_text = re.sub(r"\s*\n\s*", " ", sub_text).strip()
-                sub_items.append(f"{sm.group(1)} {sub_text}")
-                remaining_text = remaining_text.replace(sm.group(0), "")
 
-            # main text is remaining_text without subitems
-            main_text = remaining_text.strip()
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+
+                # --- Handle inline numeric subitems (1), (2), ... ---
+                inline_numeric = re.findall(r"\((\d+)\)\s*([^()]+(?:\([^()]*\)[^()]*)*)", line)
+                if inline_numeric and len(inline_numeric) > 1:
+                    for num, text_part in inline_numeric:
+                        text_part = text_part.strip().rstrip(",;.")
+                        new_item = {"text": text_part, "sub_items": []}
+                        if sub_items_stack:
+                            sub_items_stack[-1]["sub_items"].append(new_item)
+                        else:
+                            sub_items.append(new_item)
+                    continue
+
+                # --- Determine level ---
+                level = None
+                for i, pat in enumerate(level_patterns):
+                    if pat.match(line):
+                        level = i + 1
+                        break
+
+                if level is None:
+                    # Continuation text
+                    if sub_items_stack:
+                        sub_items_stack[-1]["text"] += " " + line
+                    else:
+                        main_text += (" " if main_text else "") + line
+                    continue
+
+                # --- Create new subitem ---
+                new_item = {"text": line, "sub_items": []}
+
+                # --- Attach to proper parent using stack ---
+                if sub_items_stack:
+                    # Pop from stack if current level <= stack depth
+                    while len(sub_items_stack) >= level:
+                        sub_items_stack.pop()
+
+                    if sub_items_stack:
+                        sub_items_stack[-1]["sub_items"].append(new_item)
+                    else:
+                        sub_items.append(new_item)
+                else:
+                    sub_items.append(new_item)
+
+                sub_items_stack.append(new_item)
 
             notes.append(Note(
                 note_number=number,
-                text=main_text,
+                text=main_text.strip(),
                 sub_items=sub_items or None
             ))
 
