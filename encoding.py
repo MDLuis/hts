@@ -5,60 +5,93 @@ from sentence_transformers import SentenceTransformer
 from datetime import date
 
 # ---------- Data loading ----------
-def load_texts(json_path: Path, mode: str) -> list[str]:
+def load_texts(json_path: Path) -> dict[str, list[str]]:
     """
     Load and normalize text data from a JSON file for embedding.
 
     Args:
-        json_path (Path): Path to the JSON file to load.
-        mode (str): Determines how to extract text:
-            - 'notes': For General, Section, Chapter, and Additional US Notes.
-                       Extracts 'text' fields from each note object, prepending 'title' if present.
-            - 'tariff': For Tariff Tables.
-                        Combines 'htsno' (if present) with 'description' for each row.
+        json_path (Path): Path to the unified JSON file.
 
     Returns:
-        list[str]: A flat list of strings ready for embedding.
-
-    Raises:
-        ValueError: If an unsupported mode is provided.
-    """
+        dict[str, list[str]]: Mapping of dataset name to list of text entries.
+     """
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    texts = []
+    datasets = {
+        "general_notes": [],
+        "section_notes": [],
+        "chapter_notes": [],
+        "additional_us_notes": [],
+        "tariff_tables": [],
+    }
 
-    if mode == "notes":
-        if isinstance(data, list):
-            for obj in data:
-                if isinstance(obj, dict):
-                    if "notes" in obj:
-                        for note in obj["notes"]:
-                            if "text" in note:
-                                texts.append(note["text"])
-                    elif "text" in obj:
-                        title = obj.get("title", "")
-                        t = f"{title} {obj['text']}".strip() if title else obj["text"]
-                        texts.append(t)
-        elif isinstance(data, dict):
-            title = data.get("title", "")
-            t = f"{title} {data['text']}".strip() if "text" in data else ""
-            if t:
-                texts.append(t)
+    def extract_note_text(note_obj):
+        """Recursively extract text from a note object and its sub-items."""
+        texts = []
+        if isinstance(note_obj, dict):
+            title = note_obj.get("title", "")
+            text = note_obj.get("text", "")
+            if text:
+                combined = f"{title} {text}".strip() if title else text
+                texts.append(combined)
+            sub_items = note_obj.get("sub_items")
+            if sub_items:
+                for sub in sub_items:
+                    texts.extend(extract_note_text(sub))
+        elif isinstance(note_obj, str):
+            texts.append(note_obj)
+        return texts
 
-    elif mode == "tariff":
-        if isinstance(data, list):
-            for table in data:
-                if isinstance(table, dict) and "rows" in table:
-                    for row in table["rows"]:
-                        desc = row.get("description") or ""
-                        hts = row.get("htsno") or ""
-                        if desc:
-                            texts.append(f"{hts} {desc}".strip())
-    else:
-        raise ValueError(f"Unknown mode: {mode}")
+    # ---------- General Notes ----------
+    for note in data.get("general_notes", []):
+        if isinstance(note, dict):
+            datasets["general_notes"].extend(extract_note_text(note))
 
-    return texts
+    # ---------- Sections, Chapters, Additional Notes, Tariffs ----------
+    for section in data.get("sections", []) or []:
+        if not isinstance(section, dict):
+            continue
+
+        # Section Notes
+        section_notes_container = section.get("notes")
+        if isinstance(section_notes_container, dict):
+            section_notes = section_notes_container.get("notes", [])
+            for note in section_notes:
+                datasets["section_notes"].extend(extract_note_text(note))
+
+        # Chapters
+        for chapter in section.get("chapters", []) or []:
+            if not isinstance(chapter, dict):
+                continue
+
+            # Chapter Notes
+            chapter_notes_container = chapter.get("notes")
+            if isinstance(chapter_notes_container, dict):
+                ch_notes = chapter_notes_container.get("notes", [])
+                for note in ch_notes:
+                    datasets["chapter_notes"].extend(extract_note_text(note))
+
+            # Additional U.S. Notes
+            additional = chapter.get("additional")
+            if isinstance(additional, dict):
+                add_notes = additional.get("notes", [])
+                for note in add_notes:
+                    datasets["additional_us_notes"].extend(extract_note_text(note))
+
+            # Tariff Table Rows
+            table = chapter.get("table")
+            if isinstance(table, dict):
+                rows = table.get("rows", [])
+                for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    desc = row.get("description")
+                    hts = row.get("htsno")
+                    if desc:
+                        datasets["tariff_tables"].append(f"{hts or ''} {desc}".strip())
+
+    return datasets
 
 # ---------- Encoding ----------
 def encode_and_save(texts, model, out_prefix):
@@ -72,11 +105,6 @@ def encode_and_save(texts, model, out_prefix):
 
     Returns:
         float: Encoding duration in seconds.
-
-    Side effects:
-        - Creates 'embeddings/' directory if not present.
-        - Saves embeddings as `.npy` (versioned by date and 'latest').
-        - Saves texts as `.json` (versioned by date and 'latest').
     """
     out_dir = Path("embeddings")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -103,34 +131,23 @@ def main():
     """
     Main routine:
         1. Load the SentenceTransformer model.
-        2. Load all datasets from disk (General Notes, Section Notes, etc.).
-        3. Encode each dataset, save embeddings and texts, and record timing.
-        4. Write a Markdown benchmark file summarizing performance.
-
-    Inputs:
-        - Data files under `data/notes/` and `data/tables/`.
-
-    Outputs:
-        - Embedding files saved under `embeddings/`.
-        - Markdown benchmark summary saved as `benchmarks.md`.
+        2. Load all hierarchical datasets from the unified JSON file.
+        3. Encode each dataset, save embeddings/texts, and record timing.
+        4. Write a Markdown benchmark summary.
     """
     model_name = "all-MiniLM-L6-v2"
     model = SentenceTransformer(model_name)
-    base = Path("data/notes")
+    json_path = Path("data/hts/hts_full_latest.json")
 
-    datasets = [
-        ("General Notes", load_texts(base / "general/general_notes_latest.json", "notes")),
-        ("Section Notes", load_texts(base / "section/section_notes_latest.json", "notes")),
-        ("Chapter Notes", load_texts(base / "chapter/chapter_notes_latest.json", "notes")),
-        ("Additional U.S. Notes", load_texts(base / "additional/additional_us_notes_latest.json", "notes")),
-        ("Tariff Tables", load_texts(Path("data/tables/tariff_tables_all_latest.json"), "tariff")),
-    ]
-
-    # encode + measure
+    datasets = load_texts(json_path)
     results = []
-    for name, texts in datasets:
-        duration = encode_and_save(texts, model, name.replace(" ", "_").lower())
-        results.append((name, len(texts), model_name, duration))
+
+    for key, texts in datasets.items():
+        if not texts:
+            print(f"Skipping {key} (no texts found)")
+            continue
+        duration = encode_and_save(texts, model, key)
+        results.append((key.replace("_", " ").title(), len(texts), model_name, duration))
 
     # build the markdown file
     md_path = Path("benchmarks.md")
@@ -146,7 +163,7 @@ def main():
         "|----------------------|---------|----------------------|----------------|\n",
     ]
     for name, count, model_name, duration in results:
-        lines.append(f"| {name:<20} | {count:5d} | {model_name:<20} | {duration:10.2f} |\n")
+        lines.append(f"| {name:<25} | {count:5d} | {model_name:<20} | {duration:10.2f} |\n")
 
     md_path.write_text("".join(lines), encoding="utf-8")
     print("Benchmarks written to benchmarks.md")
