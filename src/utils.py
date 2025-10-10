@@ -66,7 +66,7 @@ def combine():
         return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
 
     # Load components
-    sections = load_json(Path(f"hts_sections.json"))
+    sections = load_json(Path(f"data/sections/hts_sections_latest.json"))
     general_notes = load_json(Path("data/notes/general/general_notes_latest.json"))
     section_notes = load_json(Path(f"data/notes/section/section_notes_latest.json"))
     chapter_notes = load_json(Path(f"data/notes/chapter/chapter_notes_latest.json"))
