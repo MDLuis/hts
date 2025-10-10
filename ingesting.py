@@ -1,5 +1,6 @@
 from src.notes import GeneralNotesSource, SectionNotesSource, ChapterNotesSource, AdditionalUSNotesSource
 from src.tables import TariffTableSource
+from src.ingest import HTSSource
 import time
 from pathlib import Path
 from src.utils import combine
@@ -26,6 +27,7 @@ def main():
     """
     
     # ----------------- Initialize data source handlers -----------------
+    hts = HTSSource()
     gen_note = GeneralNotesSource()      # General notes
     sec_note = SectionNotesSource()      # Section notes
     ch_note = ChapterNotesSource()       # Chapter notes
@@ -45,6 +47,10 @@ def main():
     # Test of same chapter within one ingestion
     # chapters = [1,1,1,1,1]
     # gen_ch = [1,1,1,1,1]  
+    
+    hts_path = hts.fetch()
+    hts_data = hts.parse(hts_path)
+    hts.save(hts_data)
 
     def benchmark_dataset(name, source, append_list, chapters, parse_ch=False):
         """

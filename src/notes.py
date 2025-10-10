@@ -67,6 +67,49 @@ def download_chapter_pdf(chapter_num: int, filename: str = None) -> str:
 
     return str(pdf_path)
 
+def find_repeated(lines_list: list[str]) -> list[str]:
+    """Find repeated lines in a list """
+    repeated = []
+    checked = set()
+    for line in lines_list:
+        if line in checked:
+            continue
+        count = sum(1 for l in lines_list if l == line)
+        if count > 1:
+            repeated.append(line)
+        checked.add(line)
+    return repeated
+
+def extract_clean_text(pdf_path: str, crop_top: int = 50, crop_bottom: int = 50) -> tuple[str, list[str], list[str]]:
+    """
+    Read PDF and return combined text (headers/footers removed), plus
+    header_candidates and footer_candidates lists.
+    """
+    lines_per_page = []
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            bbox = (0, crop_top, page.width, page.height - crop_bottom)
+            t = page.within_bbox(bbox).extract_text()
+            if t:
+                lines_per_page.append(t.split("\n"))
+
+    if not lines_per_page:
+        return "", [], []
+
+    first_lines = [lines[0] for lines in lines_per_page if lines]
+    last_lines = [lines[-1] for lines in lines_per_page if lines]
+
+    header_candidates = find_repeated(first_lines)
+    footer_candidates = find_repeated(last_lines)
+
+    text = ""
+    for lines in lines_per_page:
+        lines = [l for l in lines if l not in header_candidates + footer_candidates]
+        text += "\n".join(lines) + "\n"
+
+    text = re.sub(r"\n+", "\n", text).strip()
+    return text, header_candidates, footer_candidates
+
 class GeneralNotesSource(Source):
     """
     Source class to fetch & parse one specific General Note.
@@ -162,9 +205,9 @@ class GeneralNotesSource(Source):
 
         def marker_level(marker: str):
             """Assign level to markers for hierarchy"""
-            if re.match(r'^[a-hj-z]$', marker): return 1         
+            if re.match(r'^[a-hj-uw-z]$', marker): return 1         
             if re.match(r'^[ivxlcdm]+$', marker): return 2   
-            if re.match(r'^[A-HJ-Z]$', marker): return 3       
+            if re.match(r'^[A-HJ-UW-Z]$', marker): return 3       
             if re.match(r'^\d+$', marker): return 4         
             if re.match(r'^[IVXLCDM]+$', marker): return 5 
             return 0
@@ -220,48 +263,10 @@ class SectionNotesSource(Source):
         return download_chapter_pdf(chapter_num, filename)
 
     def parse(self, pdf_path: str) -> Optional[SectionNote]:
-        """
-        Extracts section notes from the PDF, automatically detecting the section number.
-        Stops parsing if the beginning of the document doesn't mention a section.
-        """
-        # Extract all text from the PDF
-        lines_per_page = []
-        with pdfplumber.open(pdf_path) as pdf:
-            for page in pdf.pages:
-                bbox = (0, 50, page.width, page.height - 50)
-                t = page.within_bbox(bbox).extract_text()
-                if t:
-                    lines_per_page.append(t.split("\n"))
-
-        if not lines_per_page:
+        text, _, _ = extract_clean_text(pdf_path)
+        if not text:
             return SectionNote(section_number="?", notes=[])
 
-        # ---- Step 2: Detect headers/footers ----
-        def find_repeated(lines_list):
-            repeated = []
-            checked = set()
-            for line in lines_list:
-                if line in checked:
-                    continue
-                count = sum(1 for l in lines_list if l == line)
-                if count > 1:
-                    repeated.append(line)
-                checked.add(line)
-            return repeated
-
-        first_lines = [lines[0] for lines in lines_per_page if lines]
-        last_lines = [lines[-1] for lines in lines_per_page if lines]
-        header_candidates = find_repeated(first_lines)
-        footer_candidates = find_repeated(last_lines)
-
-        # ---- Step 3: Join cleaned lines ----
-        text = ""
-        for lines in lines_per_page:
-            lines = [l for l in lines if l not in header_candidates + footer_candidates]
-            text += "\n".join(lines) + "\n"
-        text = re.sub(r"\n+", "\n", text).strip()
-
-        # ---- Step 4: Your original SECTION header clipping ----
         beginning_snippet = text[:200]
         m_begin_section = re.search(r"SECTION\s+([IVXLCDM]+)", beginning_snippet, re.I)
         if not m_begin_section:
@@ -357,50 +362,9 @@ class ChapterNotesSource(Source):
         return download_chapter_pdf(chapter_num, filename)
 
     def parse(self, pdf_path: str) -> ChapterNote:
-        """
-        Extract chapter notes from a single-chapter PDF.
-
-        Skips anything before 'CHAPTER X' to avoid section notes.
-        Stops at Additional U.S. Notes, Subheading Notes, Statistical Notes,
-        or table headers. Automatically removes repeated headers/footers.
-        """
-        # 1. Read all text, page by page
-        lines_per_page = []
-        with pdfplumber.open(pdf_path) as pdf:
-            for page in pdf.pages:
-                bbox = (0, 50, page.width, page.height - 50)
-                t = page.within_bbox(bbox).extract_text()
-                if t:
-                    lines_per_page.append(t.split("\n"))
-
-        if not lines_per_page:
+        clean_text, header_candidates, footer_candidates = extract_clean_text(pdf_path)
+        if not clean_text:
             return ChapterNote(chapter_number="?", notes=[])
-
-        # 2. Detect repeated first and last lines manually
-        def find_repeated(lines_list):
-            repeated = []
-            checked = set()
-            for line in lines_list:
-                if line in checked:
-                    continue
-                count = sum(1 for l in lines_list if l == line)
-                if count > 1:
-                    repeated.append(line)
-                checked.add(line)
-            return repeated
-
-        first_lines = [lines[0] for lines in lines_per_page if lines]
-        last_lines = [lines[-1] for lines in lines_per_page if lines]
-
-        header_candidates = find_repeated(first_lines)
-        footer_candidates = find_repeated(last_lines)
-
-        # 3. Combine lines into clean text, removing headers/footers
-        clean_text = ""
-        for lines in lines_per_page:
-            lines = [line for line in lines if line not in header_candidates + footer_candidates]
-            clean_text += "\n".join(lines) + "\n"
-
         # 4. Detect chapter number
         m_chapter = re.search(r"CHAPTER\s+(\d+)", clean_text, re.I)
         chapter_number = m_chapter.group(1) if m_chapter else "?"

@@ -16,7 +16,7 @@ class HTSSource(Source):
 
     TOC_URL = "https://hts.usitc.gov/reststop/file?filename=Table+of+Contents&release=currentRelease"
 
-    def fetch(self, pdf_path: str = "hts_toc.pdf") -> str:
+    def fetch(self, pdf_path: str = "data/sections/hts_toc.pdf") -> str:
         """
         Download the HTS Table of Contents PDF.
         Args:
