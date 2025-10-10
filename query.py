@@ -29,7 +29,7 @@ def query_embeddings(query: str, model, texts, embeddings, top_k=3):
     results = []
     for rank, idx in enumerate(top_results, start=1):
         score = float(cosine_scores[idx])
-        snippet = texts[idx][:300]
+        snippet = texts[idx][:300].replace("\n", " ")
         results.append({
             "rank": rank,
             "score": score,
@@ -43,56 +43,74 @@ def generate_report(report_path: str, query_results: dict):
     Generate a Markdown report from query results including time taken.
     """
     with open(report_path, "w", encoding="utf-8") as f:
-        f.write(f"# HTS Embedding Query Report\n")
-        f.write(f"This report shows the top results for each query along with the time taken to compute them.\n\n")
+        f.write("# HTS Hierarchical Query Report\n\n")
+        f.write("This report shows top semantic matches across all HTS layers.\n\n")
 
-        for query, data in query_results.items():
-            results = data["results"]
-            elapsed = data["time_taken"]
+        for query, layer_data in query_results.items():
+            f.write(f"## 🔍 Query: **{query}**\n\n")
 
-            f.write(f"## Query: {query}\n")
-            f.write(f"**Time taken:** {elapsed:.4f} seconds\n\n")
+            for layer_name, results_info in layer_data.items():
+                if not results_info:
+                    continue
+                results = results_info["results"]
+                elapsed = results_info["time_taken"]
 
-            for r in results:
-                f.write(f"**Rank {r['rank']} | Score: {r['score']:.4f}**\n\n")
-                f.write(f"{r['text_snippet']}...\n\n")
-            f.write("\n\n")
+                f.write(f"### 📘 {layer_name.replace('_', ' ').title()}\n")
+                f.write(f"Time taken: `{elapsed:.3f}s`\n\n")
+
+                if not results:
+                    f.write("_No matches found._\n\n")
+                    continue
+
+                for r in results:
+                    f.write(f"- **Rank {r['rank']}** | Score `{r['score']:.4f}`\n")
+                    f.write(f"  > {r['text_snippet']}...\n\n")
+
+            f.write("\n---\n\n")
 
 
 def main():
     model_name = "all-MiniLM-L6-v2"
     model = SentenceTransformer(model_name)
 
-    # Dataset
-    prefix = "chapter_notes"
-    texts, embeddings = load_embeddings(prefix)
+    # Hierarchical datasets to include
+    prefixes = [
+        "general_notes",
+        "section_notes",
+        "chapter_notes",
+        "additional_us_notes",
+        "tariff_tables"
+    ]
 
     # Hardcoded queries
     queries = [
-        # Related to Chapters 1-9
         "Live cattle and other animals",
         "Dairy products including milk and butter",
         "Edible roots and tubers",
         "Coffee, tea, and spices",
-        "Silk and woven textile fabrics",
-        # HTS-related but outside Chapters 1-9
-        "Vehicles and automotive parts",
-        "Pharmaceutical products and chemicals",
-        "Iron and steel products",
-        "Electronic machinery and components",
-        "Plastic and rubber materials"
+        "yogurt",
+        "unroasted iron pyrites",
+        "milk and cream",
+        "Meat of bovine animals",
+        
     ]
 
-    # Run queries and store results
     query_results = {}
+
+    # Loop through each query and evaluate on all datasets
     for query in queries:
-        start = time.perf_counter()
-        results = query_embeddings(query, model, texts, embeddings)
-        elapsed = time.perf_counter() - start
-        query_results[query] = {
-        "results": results,
-        "time_taken": elapsed
-    }
+        layer_results = {}
+        for prefix in prefixes:
+            texts, embeddings = load_embeddings(prefix)
+            if texts is None or embeddings is None:
+                continue
+
+            start = time.perf_counter()
+            results = query_embeddings(query, model, texts, embeddings, top_k=3)
+            elapsed = time.perf_counter() - start
+            layer_results[prefix] = {"results": results, "time_taken": elapsed}
+
+        query_results[query] = layer_results
 
     # Generate Markdown report
     report_path = "query_report.md"

@@ -12,8 +12,8 @@ All embeddings were generated with [`sentence-transformers`](https://www.sbert.n
 
 | Dataset              | # Texts | Model                | Time (seconds) |
 |----------------------|---------|----------------------|----------------|
-| General Notes        |     9 | all-MiniLM-L6-v2     |       0.59 |
-| Section Notes        |     2 | all-MiniLM-L6-v2     |       0.05 |
-| Chapter Notes        |    28 | all-MiniLM-L6-v2     |       1.09 |
-| Additional U.S. Notes |    45 | all-MiniLM-L6-v2     |       1.80 |
-| Tariff Tables        |  2943 | all-MiniLM-L6-v2     |      15.16 |
+| General Notes             |  8765 | all-MiniLM-L6-v2     |     138.33 |
+| Section Notes             |    35 | all-MiniLM-L6-v2     |       1.93 |
+| Chapter Notes             |  1050 | all-MiniLM-L6-v2     |      11.99 |
+| Additional Us Notes       |   537 | all-MiniLM-L6-v2     |      12.07 |
+| Tariff Tables             | 36108 | all-MiniLM-L6-v2     |     230.92 |
