@@ -4,159 +4,152 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from datetime import date
 
-# ---------- Data loading ----------
-def load_texts(json_path: Path) -> dict[str, list[str]]:
+def extract_note_text(note_obj, section_title, chapter_title):
     """
-    Load and normalize text data from a JSON file for embedding.
+    Recursively extract 'text' and 'sub_items' from a note object.
 
-    Args:
-        json_path (Path): Path to the unified JSON file.
+    Each returned item is a dict containing:
+        - text (string)
+        - section_title (string)
+        - chapter_title (string)
+        - htsno (optional)
+    """
+    texts = []
+    if isinstance(note_obj, dict):
+        main_text = note_obj.get("text", "")
+        if main_text:
+            texts.append({
+                "text": main_text.strip(),
+                "section_title": section_title,
+                "chapter_title": chapter_title,
+                "htsno": note_obj.get("htsno")
+            })
+        sub_items = note_obj.get("sub_items")
+        if sub_items:
+            for sub in sub_items:
+                if isinstance(sub, str):
+                    texts.append({
+                        "text": sub.strip(),
+                        "section_title": section_title,
+                        "chapter_title": chapter_title,
+                        "htsno": note_obj.get("htsno")
+                    })
+                elif isinstance(sub, dict):
+                    texts.extend(extract_note_text(sub, section_title, chapter_title))
+    return texts
 
-    Returns:
-        dict[str, list[str]]: Mapping of dataset name to list of text entries.
-     """
+# ---------- Data loading ----------
+def load_texts(json_path: Path):
+    """
+    Load and separate:
+      - section_titles
+      - chapter_titles
+      - chapter_notes
+      - tariff_tables
+    """
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    datasets = {
-        "general_notes": [],
-        "section_notes": [],
-        "chapter_notes": [],
-        "additional_us_notes": [],
-        "tariff_tables": [],
-    }
+    section_titles = []
+    chapter_titles = []
+    chapter_notes = []
+    tariff_tables = []
 
-    def extract_note_text(note_obj):
-        """Recursively extract text from a note object and its sub-items."""
-        texts = []
-        if isinstance(note_obj, dict):
-            title = note_obj.get("title", "")
-            text = note_obj.get("text", "")
-            if text:
-                combined = f"{title} {text}".strip() if title else text
-                texts.append(combined)
-            sub_items = note_obj.get("sub_items")
-            if sub_items:
-                for sub in sub_items:
-                    texts.extend(extract_note_text(sub))
-        elif isinstance(note_obj, str):
-            texts.append(note_obj)
-        return texts
+    for section in data.get("sections", []):
+        section_title = f"Section {section.get('sec_number', '')}: {section.get('title', '').strip()}".strip(": ")
+        section_titles.append(section_title)
 
-    # ---------- General Notes ----------
-    for note in data.get("general_notes", []):
-        if isinstance(note, dict):
-            datasets["general_notes"].extend(extract_note_text(note))
-
-    # ---------- Sections, Chapters, Additional Notes, Tariffs ----------
-    for section in data.get("sections", []) or []:
-        if not isinstance(section, dict):
-            continue
-
-        # Section Notes
-        section_notes_container = section.get("notes")
-        if isinstance(section_notes_container, dict):
-            section_notes = section_notes_container.get("notes", [])
-            for note in section_notes:
-                datasets["section_notes"].extend(extract_note_text(note))
-
-        # Chapters
         for chapter in section.get("chapters", []) or []:
-            if not isinstance(chapter, dict):
-                continue
+            chapter_title = f"{chapter.get('ch_number', '')}: {chapter.get('title', '').strip()}"
+            chapter_titles.append(f"{section_title} | {chapter_title}")
 
-            # Chapter Notes
-            chapter_notes_container = chapter.get("notes")
-            if isinstance(chapter_notes_container, dict):
-                ch_notes = chapter_notes_container.get("notes", [])
-                for note in ch_notes:
-                    datasets["chapter_notes"].extend(extract_note_text(note))
+            notes_container = chapter.get("notes") or {}
+            if isinstance(notes_container, dict):
+                for note in notes_container.get("notes", []):
+                    if not isinstance(note, dict):
+                        continue
+                    extracted = extract_note_text(note, section_title, chapter_title)
+                    chapter_notes.extend(extracted)
 
-            # Additional U.S. Notes
-            additional = chapter.get("additional")
-            if isinstance(additional, dict):
-                add_notes = additional.get("notes", [])
-                for note in add_notes:
-                    datasets["additional_us_notes"].extend(extract_note_text(note))
-
-            # Tariff Table Rows
             table = chapter.get("table")
             if isinstance(table, dict):
-                rows = table.get("rows", [])
-                for row in rows:
+                for row in table.get("rows", []) or []:
                     if not isinstance(row, dict):
                         continue
-                    desc = row.get("description")
+                    desc = row.get("description", "")
                     hts = row.get("htsno")
                     if desc:
-                        datasets["tariff_tables"].append(f"{hts or ''} {desc}".strip())
+                        tariff_tables.append({
+                            "text": desc.strip(),
+                            "section_title": section_title,
+                            "chapter_title": chapter_title,
+                            "htsno": hts
+                        })
 
-    return datasets
+    return section_titles, chapter_titles, chapter_notes, tariff_tables
 
 # ---------- Encoding ----------
-def encode_and_save(texts, model, out_prefix):
+def encode_and_save(items, model, prefix):
     """
-    Encode texts into embeddings, save them with versioning, and return encoding duration.
-
-    Args:
-        texts (list[str]): List of strings to embed.
-        model (SentenceTransformer): Preloaded sentence-transformer model.
-        out_prefix (str): Prefix for output filenames (e.g., 'general_notes').
-
-    Returns:
-        float: Encoding duration in seconds.
+    Encode texts or note dicts into embeddings and save embeddings + metadata.
     """
     out_dir = Path("embeddings")
     out_dir.mkdir(parents=True, exist_ok=True)
     version = date.today().isoformat()
 
-    print(f"Encoding {len(texts)} texts for {out_prefix}...")
-    start = time.time()
-    embeddings = model.encode(texts, batch_size=32, show_progress_bar=True)
-    end = time.time()
-    duration = end - start
-    print(f"Encoding took {duration:.2f} seconds for {out_prefix}")
+    if all(isinstance(i, dict) for i in items):
+        texts = [i["text"] for i in items]
+    else:
+        texts = items
 
-    np.save(out_dir / f"{out_prefix}_embeddings_v{version}.npy", embeddings)
-    np.save(out_dir / f"{out_prefix}_embeddings_latest.npy", embeddings)
-    with open(out_dir / f"{out_prefix}_texts_v{version}.json", "w", encoding="utf-8") as f:
-        json.dump(texts, f, ensure_ascii=False, indent=2)
-    with open(out_dir / f"{out_prefix}_texts_latest.json", "w", encoding="utf-8") as f:
-        json.dump(texts, f, ensure_ascii=False, indent=2)
+    start = time.perf_counter()
+    embeddings = model.encode(texts, batch_size=32, show_progress_bar=True)
+    duration = time.perf_counter() - start
+
+    # Save embeddings
+    np.save(out_dir / f"{prefix}_embeddings_v{version}.npy", embeddings)
+    np.save(out_dir / f"{prefix}_embeddings_latest.npy", embeddings)
+
+    # Save metadata
+    with open(out_dir / f"{prefix}_metadata_v{version}.json", "w", encoding="utf-8") as f:
+        json.dump(items, f, ensure_ascii=False, indent=2)
+    with open(out_dir / f"{prefix}_metadata_latest.json", "w", encoding="utf-8") as f:
+        json.dump(items, f, ensure_ascii=False, indent=2)
 
     return duration
 
 # ---------- Main ----------
 def main():
-    """
-    Main routine:
-        1. Load the SentenceTransformer model.
-        2. Load all hierarchical datasets from the unified JSON file.
-        3. Encode each dataset, save embeddings/texts, and record timing.
-        4. Write a Markdown benchmark summary.
-    """
     model_name = "all-MiniLM-L6-v2"
     model = SentenceTransformer(model_name)
     json_path = Path("data/hts/hts_full_latest.json")
 
-    datasets = load_texts(json_path)
+    section_titles, chapter_titles, chapter_notes, tariff_tables = load_texts(json_path)
+
     results = []
 
-    for key, texts in datasets.items():
-        if not texts:
-            print(f"Skipping {key} (no texts found)")
-            continue
-        duration = encode_and_save(texts, model, key)
-        results.append((key.replace("_", " ").title(), len(texts), model_name, duration))
+    # Encode each dataset and track performance
+    datasets = [
+        ("section_titles", section_titles),
+        ("chapter_titles", chapter_titles),
+        ("chapter_notes", chapter_notes),
+        ("tariff_tables", tariff_tables),
+    ]
 
-    # build the markdown file
+    for name, data_list in datasets:
+        if not data_list:
+            continue
+        duration = encode_and_save(data_list, model, name)
+        results.append((name.replace("_", " ").title(), len(data_list), model_name, duration))
+
+    # ---------- Benchmark Markdown ----------
     md_path = Path("benchmarks.md")
     lines = [
         "# Benchmarks – HTS Embedding Encoding\n",
         "\nThis file records how long the embedding process takes on the available hardware.  \n",
         f"All embeddings were generated with [`sentence-transformers`](https://www.sbert.net) using the `{model_name}` model.\n",
         "\n## Notes\n\n",
-        "- All times measured with `time.time()` before and after `model.encode()`.\n",
+        "- All times measured with `time.perf_counter()` before and after `model.encode()`.\n",
         "- Batch size: 32\n\n",
         "## Results\n\n",
         "| Dataset              | # Texts | Model                | Time (seconds) |\n",

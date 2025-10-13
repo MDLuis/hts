@@ -1,524 +1,357 @@
-# HTS Hierarchical Query Report
+# HTS Hierarchical Embedding Query Report
 
-This report shows top semantic matches across all HTS layers.
+## Query: Meat of bovine animals
+**Processing Time:** 0.788 seconds
 
-## 🔍 Query: **Live cattle and other animals**
+### Closest Section
+- **Name:** Section I: LIVE ANIMALS; ANIMAL PRODUCTS
+- **Score:** 0.5396
 
-### 📘 General Notes
-Time taken: `0.024s`
+### Closest Chapter Within Section
+- **Name:** 2: Meat and edible meat offal
+- **Score:** 0.6573
 
-- **Rank 1** | Score `0.5421`
-  > (B) live animals born and raised in the territory of one or more of the parties to the Agreement;...
+### Top Notes From Current Chapter
+- **Score: 0.428** 
+	 - (c) Guts, bladders, or stomachs of animals (heading 0504) or animal blood (heading 0511 or 3002); or...
+- **Score: 0.425** 
+	 - (d) Animal fat, other than products of heading 0209 (chapter 15)...
+- **Score: 0.227** 
+	 - (b) Edible, non-living insects (heading 0410);...
 
-- **Rank 2** | Score `0.4958`
-  > (B) live animals born and raised in the territory of Peru, the United States, or both;...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 1.000** 
+	 - HTS Code: 0210.20.00.00, Meat of bovine animals...
+- **Score: 0.859** 
+	 - HTS Code: 0201, Meat of bovine animals, fresh or chilled:...
+- **Score: 0.825** 
+	 - HTS Code: 0202, Meat of bovine animals, frozen:...
 
-- **Rank 3** | Score `0.4888`
-  > (C) goods obtained in the territory of one or more of the parties to the Agreement from live animals;...
-
-### 📘 Section Notes
-Time taken: `0.010s`
-
-- **Rank 1** | Score `0.2774`
-  > Any reference in this section to a particular genus or species of an animal, except where the context otherwise requires, includes a reference to the young of that genus or species....
-
-- **Rank 2** | Score `0.2295`
-  > (a) Animal brush-making bristles or hair (heading 0502); horsehair or horsehair waste (heading 0511);...
-
-- **Rank 3** | Score `0.1652`
-  > (e) Goods of...
-
-### 📘 Chapter Notes
-Time taken: `0.010s`
-
-- **Rank 1** | Score `0.5730`
-  > This chapter covers all live animals except:...
-
-- **Rank 2** | Score `0.4073`
-  > (c) Hides or skins, with the hair or wool on, raw, tanned or dressed (chapter 43); the following are, however, to be classified in chapter 41, namely, raw hides and skins with the hair or wool on, of bovine animals (including buffalo), of equine animals, of sheep or lambs (except Astrakhan, Broadtai...
-
-- **Rank 3** | Score `0.3767`
-  > (b) Meat of mammals of heading 0106 (heading 0208 or 0210);...
-
-### 📘 Additional Us Notes
-Time taken: `0.009s`
-
-- **Rank 1** | Score `0.4468`
-  > Certain special provisions applying to live animals are in chapter 98. 1/The animal certificate of pure breeding is an obsolete form and can no longer be obtained from the U.S. Department of Agriculture. Consult U.S. Customs for additional information. 1-2...
-
-- **Rank 2** | Score `0.3636`
-  > (v) To the importation of live birds....
-
-- **Rank 3** | Score `0.3333`
-  > The aggregate quantity of animal feed containing milk or milk derivatives entered under subheadings 2309.90.24 and 2309.90.44 in any calendar year shall not exceed 7,399,700 kilograms (articles the product of Mexico shall not be permitted or included in the aforementioned quantitative limitation and...
-
-### 📘 Tariff Tables
-Time taken: `0.038s`
-
-- **Rank 1** | Score `0.7839`
-  > Cattle:...
-
-- **Rank 2** | Score `0.6878`
-  > Of bovine animals:...
-
-- **Rank 3** | Score `0.6878`
-  > Of bovine animals:...
-
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 1.0000
+- **HTS Code:** 0210.20.00.00
+- **Section:** Section I: LIVE ANIMALS; ANIMAL PRODUCTS
+- **Chapter:** 2: Meat and edible meat offal
+- **Description:** Meat of bovine animals...
 
 ---
 
-## 🔍 Query: **Dairy products including milk and butter**
+## Query: Wheat and meslin
+**Processing Time:** 1.078 seconds
 
-### 📘 General Notes
-Time taken: `0.016s`
+### Closest Section
+- **Name:** Section IV: PREPARED FOODSTUFFS; BEVERAGES, SPIRITS AND VINEGAR;TOBACCO AND MANUFACTURED
+- **Score:** 0.3472
 
-- **Rank 1** | Score `0.6329`
-  > (ii) Certain dairy and dairy-containing products. A good containing over 10 percent by weight of milk solids classified in chapter 4 or heading 1901, 2105, 2106 or 2202 must be made from originating milk....
+### Closest Chapter Within Section
+- **Name:** 19: Preparations of cereals, flour, starch or milk; bakers' wares
+- **Score:** 0.4309
 
-- **Rank 2** | Score `0.6329`
-  > (ii) Certain dairy and dairy-containing products. A good containing over 10 percent by weight of milk solids classified in chapter 4 or heading 1901, 2105, 2106 or 2202 must be made from originating milk....
+### Top Notes From Current Chapter
+- **Score: 0.377** 
+	 - (b) Biscuits or other articles made from flour or from starch, specially prepared for use in animal feeding (heading 2309); or...
+- **Score: 0.336** 
+	 - (a) The term "groats" means cereal groats of chapter 11;...
+- **Score: 0.274** 
+	 - (a) Except in the case of stuffed products of heading 1902, food preparations containing more than 20 percent by weight of sausage, meat, meat offal, blood, insects, fish or crustaceans, molluscs or o...
 
-- **Rank 3** | Score `0.5911`
-  > (3) a dairy preparations containing over 10 percent by dry weight of milk solids, of subheading 1901.90 or 2106.90;...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.545** 
+	 - HTS Code: 1905.90.10.70, Bread...
+- **Score: 0.517** 
+	 - HTS Code: 1904.30.00.00, Bulgur wheat...
+- **Score: 0.508** 
+	 - HTS Code: 1905.10.00.00, Crispbread...
 
-### 📘 Section Notes
-Time taken: `0.009s`
-
-- **Rank 1** | Score `0.2957`
-  > Except where the context otherwise requires, throughout the tariff schedule any reference to "dried" products also covers products which have been dehydrated, evaporated or freeze-dried....
-
-- **Rank 2** | Score `0.2252`
-  > (e) Goods of...
-
-- **Rank 3** | Score `0.1929`
-  > (c) Cotton linters or other vegetable materials of...
-
-### 📘 Chapter Notes
-Time taken: `0.009s`
-
-- **Rank 1** | Score `0.6244`
-  > (a) The term "butter" means natural butter, whey butter or recombined butter (fresh, salted or rancid, including canned butter) derived exclusively from milk, with a milkfat content of 80 percent or more but not more than 95 percent by weight, a maximum milk solids-not-fat content of 2 percent by we...
-
-- **Rank 2** | Score `0.5973`
-  > The expression "milk" means full cream milk or partially or completely skimmed milk....
-
-- **Rank 3** | Score `0.5856`
-  > (c) Products obtained from milk by replacing one or more of its natural constituents (for example, butyric fats) by another substance (for example, oleic fats) (heading 1901 or 2106); or...
-
-### 📘 Additional Us Notes
-Time taken: `0.009s`
-
-- **Rank 1** | Score `0.7090`
-  > For the purposes of this schedule, the term "dairy products described in additional U.S. note 1 to chapter 4" means any of the following goods: malted milk, and articles of milk or cream (except (a) white chocolate and (b) inedible dried milk powders certified to be used for calibrating infrared mil...
-
-- **Rank 2** | Score `0.5289`
-  > The aggregate quantity of milk and cream, fluid or frozen, fresh or sour, containing over 6 percent but not over 45 percent by weight of butterfat, the foregoing goods entered under subheadings 0401.40.05, 0401.50.05 and 0403.90.04 in any calendar year shall not exceed 6,694,840 liters (articles the...
-
-- **Rank 3** | Score `0.4475`
-  > The aggregate quantity of dried milk and dried cream, whether or not containing added sugar or other sweetening matter, the foregoing goods entered under subheadings 0402.21.75 and 0403.90.61 in any calendar year shall not exceed 99,500 kilograms (articles the product of Mexico shall not be permitte...
-
-### 📘 Tariff Tables
-Time taken: `0.030s`
-
-- **Rank 1** | Score `0.8058`
-  > Dairy:...
-
-- **Rank 2** | Score `0.7568`
-  > Dairy products described in additional U.S. note 1 to chapter 4:...
-
-- **Rank 3** | Score `0.7568`
-  > Dairy products described in additional U.S. note 1 to chapter 4:...
-
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.9815
+- **HTS Code:** 1001
+- **Section:** Section II: VEGETABLE PRODUCTS
+- **Chapter:** 10: Cereals
+- **Description:** Wheat and meslin:...
 
 ---
 
-## 🔍 Query: **Edible roots and tubers**
+## Query: Silk fabrics
+**Processing Time:** 0.335 seconds
 
-### 📘 General Notes
-Time taken: `0.017s`
+### Closest Section
+- **Name:** Section XI: TEXTILES AND TEXTILE ARTICLES
+- **Score:** 0.6466
 
-- **Rank 1** | Score `0.4228`
-  > (vi) For purposes of applying this note to goods of chapters 6 through 14, inclusive, agricultural and horticultural goods grown in the territory of Australia or of the United States shall be treated as originating therein even if grown from seed, bulbs, rootstock, cuttings, grafts, shoots, buds or ...
+### Closest Chapter Within Section
+- **Name:** 50: Silk
+- **Score:** 0.7567
 
-- **Rank 2** | Score `0.4208`
-  > (vi) For purposes of applying this note to goods of chapters 6 through 14, inclusive, agricultural and horticultural goods grown in the territory of a party shall be treated as an originating good even if grown from seeds, bulbs, rootstock, cuttings, grafts, shoots, buds or other live parts of plant...
+### Top Notes From Current Chapter
+- No notes found.
 
-- **Rank 3** | Score `0.3901`
-  > (iv) For purposes of applying this note to goods of chapters 6 through 14, inclusive, agricultural and horticultural goods grown in the territory of Panama or of the United States shall be treated as originating therein even if grown from seed, bulbs, rootstock, cuttings, grafts, shoots, buds or oth...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.837** 
+	 - HTS Code: 5007.10, Fabrics of noil silk:...
+- **Score: 0.835** 
+	 - HTS Code: 5007, Woven fabrics of silk or of silk waste:...
+- **Score: 0.769** 
+	 - HTS Code: 5007.90, Other fabrics:...
 
-### 📘 Section Notes
-Time taken: `0.009s`
-
-- **Rank 1** | Score `0.3238`
-  > (c) Cotton linters or other vegetable materials of...
-
-- **Rank 2** | Score `0.1938`
-  > (e) Goods of...
-
-- **Rank 3** | Score `0.1721`
-  > (a) Joints, washers or the like of any material (classified according to their constituent material or in heading 8484) or other articles of vulcanized rubber other than hard rubber (heading 4016);...
-
-### 📘 Chapter Notes
-Time taken: `0.010s`
-
-- **Rank 1** | Score `0.4782`
-  > Subject to the second part of heading 0601, this chapter covers only live trees and goods (including seedling vegetables) of a kind commonly supplied by nursery gardeners or florists for planting or for ornamental use; nevertheless it does not include potatoes, onions, shallots, garlic or other prod...
-
-- **Rank 2** | Score `0.4690`
-  > (a) Leguminous vegetables or sweet corn (chapter 7);...
-
-- **Rank 3** | Score `0.4682`
-  > (b) Edible, non-living insects (heading 0410);...
-
-### 📘 Additional Us Notes
-Time taken: `0.008s`
-
-- **Rank 1** | Score `0.4338`
-  > Articles of a kind covered by this chapter that can be used either for food or for sowing or planting (e.g., onions, onion sets, shallots, garlic, potatoes, and potato eyes) remain classified in this chapter even if rendered inedible as the result of treatment with insecticides, fungicides or simila...
-
-- **Rank 2** | Score `0.3706`
-  > The importation of pepper shells, ground or unground, is prohibited....
-
-- **Rank 3** | Score `0.3476`
-  > (b) blended syrups containing sugars derived from sugar cane or sugar beets, capable of being further processed or mixed with similar or other ingredients, and not prepared for marketing to the ultimate consumer in the identical form and package in which imported; (c) articles containing over 65 per...
-
-### 📘 Tariff Tables
-Time taken: `0.031s`
-
-- **Rank 1** | Score `0.5540`
-  > 8433.53.00.00 Root or tuber harvesting machines...
-
-- **Rank 2** | Score `0.5069`
-  > Vegetables:...
-
-- **Rank 3** | Score `0.5020`
-  > 0706 Carrots, turnips, salad beets (salad beetroot), salsify, celeriac, radishes and similar edible roots, fresh or chilled:...
-
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.8374
+- **HTS Code:** 5007.10
+- **Section:** Section XI: TEXTILES AND TEXTILE ARTICLES
+- **Chapter:** 50: Silk
+- **Description:** Fabrics of noil silk:...
 
 ---
 
-## 🔍 Query: **Coffee, tea, and spices**
+## Query: Passenger motor vehicles
+**Processing Time:** 2.258 seconds
 
-### 📘 General Notes
-Time taken: `0.016s`
+### Closest Section
+- **Name:** Section XVII: VEHICLES, AIRCRAFT, VESSELS AND ASSOCIATED
+- **Score:** 0.3944
 
-- **Rank 1** | Score `0.4546`
-  > (D) A nonoriginating material of chapter 9 used or consumed in the production of instant coffee, not flavored, of subheading 2101.11....
+### Closest Chapter Within Section
+- **Name:** 87: Vehicles other than railway or tramway rolling stock, and parts and accessories thereof
+- **Score:** 0.4697
 
-- **Rank 2** | Score `0.4224`
-  > (5) beverages containing milk of subheading 2202.90;...
+### Top Notes From Current Chapter
+- **Score: 0.353** 
+	 - Motor chassis fitted with cabs fall in headings 8702 to 8704, and not in heading 8706....
+- **Score: 0.288** 
+	 - For the purposes of this chapter, "tractors" means vehicles constructed essentially for hauling or pushing another vehicle, appliance or load, whether or not they contain subsidiary provision for the ...
+- **Score: 0.247** 
+	 - Heading 8712 includes all children's bicycles. Other children's cycles fall in heading 9503....
 
-- **Rank 3** | Score `0.4190`
-  > (5) beverages containing milk, the foregoing provided for in subheading 2202.90; or...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.779** 
+	 - HTS Code: 8707.10.00.20, For passenger automobiles...
+- **Score: 0.779** 
+	 - HTS Code: 8706.00.15.20, For passenger automobiles...
+- **Score: 0.752** 
+	 - HTS Code: 8702, Motor vehicles for the transport of ten or more persons, including the driver:...
 
-### 📘 Section Notes
-Time taken: `0.010s`
-
-- **Rank 1** | Score `0.3106`
-  > (e) Goods of...
-
-- **Rank 2** | Score `0.2808`
-  > Goods put up in sets consisting of two or more separate constituents, some or all of which fall in this section and are intended to be mixed together to obtain a product of section VI or VII, are to be classified in the heading appropriate to that product, provided that the constituents are:...
-
-- **Rank 3** | Score `0.2808`
-  > Goods put up in sets consisting of two or more separate constituents, some or all of which fall in this section and are intended to be mixed together to obtain a product of section VI or VII, are to be classified in the heading appropriate to that product, provided that the constituents are:...
-
-### 📘 Chapter Notes
-Time taken: `0.009s`
-
-- **Rank 1** | Score `0.6561`
-  > (c) Extracts of coffee, tea or maté (heading 2101);...
-
-- **Rank 2** | Score `0.6149`
-  > (b) Spices or other products of chapter 9;...
-
-- **Rank 3** | Score `0.5230`
-  > (c) Flavored tea (heading 0902);...
-
-### 📘 Additional Us Notes
-Time taken: `0.021s`
-
-- **Rank 1** | Score `0.4357`
-  > All immediate containers and wrappings, and all intermediate containers, of tea (heading 0902) in packages of less than 2.3 kg, net, each are dutiable at the rates applicable to such containers and wrappings if imported empty, except that such goods originating in the following territories listed be...
-
-- **Rank 2** | Score `0.3848`
-  > For the purposes of this chapter, the term "mixed condiments and mixed seasonings described in additional U.S. note 3 to this chapter" means articles containing over 10 percent by dry weight of sugars derived from sugar cane or sugar beets, whether or not mixed with other ingredients, except (a) art...
-
-- **Rank 3** | Score `0.3020`
-  > (b) blended syrups containing sugars derived from sugar cane or sugar beets, capable of being further processed or mixed with similar or other ingredients, and not prepared for marketing to the ultimate consumer in the identical form and package in which imported; (c) articles containing over 65 per...
-
-### 📘 Tariff Tables
-Time taken: `0.032s`
-
-- **Rank 1** | Score `0.6961`
-  > Other spices:...
-
-- **Rank 2** | Score `0.5957`
-  > Coffee, roasted:...
-
-- **Rank 3** | Score `0.5645`
-  > Extracts, essences and concentrates of coffee, and preparations with a basis of these extracts, essences or concentrates or with a basis of coffee:...
-
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.7787
+- **HTS Code:** 8706.00.15.20
+- **Section:** Section XVII: VEHICLES, AIRCRAFT, VESSELS AND ASSOCIATED
+- **Chapter:** 87: Vehicles other than railway or tramway rolling stock, and parts and accessories thereof
+- **Description:** For passenger automobiles...
 
 ---
 
-## 🔍 Query: **yogurt**
+## Query: Medicaments containing antibiotics
+**Processing Time:** 1.736 seconds
 
-### 📘 General Notes
-Time taken: `0.017s`
+### Closest Section
+- **Name:** Section IV: PREPARED FOODSTUFFS; BEVERAGES, SPIRITS AND VINEGAR;TOBACCO AND MANUFACTURED
+- **Score:** 0.3132
 
-- **Rank 1** | Score `0.3685`
-  > (3) Fermentation....
+### Closest Chapter Within Section
+- **Name:** 21: Miscellaneous edible preparations
+- **Score:** 0.3333
 
-- **Rank 2** | Score `0.3434`
-  > (5) beverages containing milk of subheading 2202.90;...
+### Top Notes From Current Chapter
+- **Score: 0.289** 
+	 - (g) Yeast put up as a medicament or other products of heading 3003 or 3004; or...
+- **Score: 0.272** 
+	 - Extracts of the substitutes referred to in note 1(b) above are to be classified in heading 2101....
+- **Score: 0.258** 
+	 - (e) Food preparations, other than the products described in heading 2103 or 2104, containing more than 20 percent by weight of sausage, meat, meat offal, blood, insects, fish or crustaceans, molluscs ...
 
-- **Rank 3** | Score `0.3274`
-  > (5) beverages containing milk provided for in subheading 2202.90; or...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.337** 
+	 - HTS Code: 2103.90.90.40, Other salad dressings...
+- **Score: 0.333** 
+	 - HTS Code: 2106, Food preparations not elsewhere specified or included:...
+- **Score: 0.301** 
+	 - HTS Code: 2106.90.99.87, Herbal teas and herbal infusions comprising mixed herbs...
 
-### 📘 Section Notes
-Time taken: `0.010s`
-
-- **Rank 1** | Score `0.2261`
-  > (c) Cotton linters or other vegetable materials of...
-
-- **Rank 2** | Score `0.1986`
-  > (e) Goods of...
-
-- **Rank 3** | Score `0.1626`
-  > (a) Joints, washers or the like of any material (classified according to their constituent material or in heading 8484) or other articles of vulcanized rubber other than hard rubber (heading 4016);...
-
-### 📘 Chapter Notes
-Time taken: `0.009s`
-
-- **Rank 1** | Score `0.6671`
-  > For the purposes of heading 0403, yogurt may be concentrated or flavored and may contain added sugar or other sweetening matter, fruit, nuts, cocoa, chocolate, spices, coffee or coffee extracts, plants, parts of plants, cereals or bakers’ wares, provided that any added substance is not used for the ...
-
-- **Rank 2** | Score `0.3470`
-  > (c) Cereals (chapter 10); or...
-
-- **Rank 3** | Score `0.3452`
-  > (g) Yeast put up as a medicament or other products of heading 3003 or 3004; or...
-
-### 📘 Additional Us Notes
-Time taken: `0.008s`
-
-- **Rank 1** | Score `0.3402`
-  > For the purposes of this schedule, the term "dairy products described in additional U.S. note 1 to chapter 4" means any of the following goods: malted milk, and articles of milk or cream (except (a) white chocolate and (b) inedible dried milk powders certified to be used for calibrating infrared mil...
-
-- **Rank 2** | Score `0.3175`
-  > The aggregate quantity of dried milk and dried cream, whether or not containing added sugar or other sweetening matter, the foregoing goods entered under subheadings 0402.21.75 and 0403.90.61 in any calendar year shall not exceed 99,500 kilograms (articles the product of Mexico shall not be permitte...
-
-- **Rank 3** | Score `0.3068`
-  > (b) blended syrups containing sugars derived from sugar cane or sugar beets, capable of being further processed or mixed with similar or other ingredients, and not prepared for marketing to the ultimate consumer in the identical form and package in which imported; (c) articles containing over 65 per...
-
-### 📘 Tariff Tables
-Time taken: `0.031s`
-
-- **Rank 1** | Score `0.7194`
-  > 0403.20 Yogurt:...
-
-- **Rank 2** | Score `0.5983`
-  > 0403 Yogurt; buttermilk, curdled milk and cream, kephir and other fermented or acidified milk and cream, whether or not concentrated or containing added sugar or other sweetening matter or flavored or containing added fruit, nuts or cocoa:...
-
-- **Rank 3** | Score `0.5542`
-  > Egg yolks:...
-
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.7691
+- **HTS Code:** 3003.20.00.00
+- **Section:** Section VI: PRODUCTS OF THE CHEMICAL OR ALLIED INDUSTRIES
+- **Chapter:** 30: Pharmaceutical products
+- **Description:** Other, containing antibiotics...
 
 ---
 
-## 🔍 Query: **unroasted iron pyrites**
+## Query: Flat-rolled products of stainless steel
+**Processing Time:** 3.565 seconds
 
-### 📘 General Notes
-Time taken: `0.015s`
+### Closest Section
+- **Name:** Section VI: PRODUCTS OF THE CHEMICAL OR ALLIED INDUSTRIES
+- **Score:** 0.3506
 
-- **Rank 1** | Score `0.3841`
-  > (B) A change to fabricated crocidolite fibers or mixtures with a basis of crocidolite or with a basis of crocidolite and magnesium carbonate of subheading 6812.80 from any other chapter;...
+### Closest Chapter Within Section
+- **Name:** 38: Miscellaneous chemical products
+- **Score:** 0.3425
 
-- **Rank 2** | Score `0.3716`
-  > (F) A change to any other good of subheading 6812.80 from fabricated crocidolite fibers or mixtures with a basis of crocidolite and magnesium carbonate, yarn or thread, cords or string, whether or not plaited, or woven or knitted fabric of subheading 6812.80 or from any other subheading. 3. A change...
+### Top Notes From Current Chapter
+- **Score: 0.309** 
+	 - (c) Products of heading 2404;...
+- **Score: 0.253** 
+	 - (f) Spent catalysts of a kind used for the extraction of base metals or for the manufacture of chemical compounds of base metals (heading 2620), spent catalysts of a kind used principally for the reco...
+- **Score: 0.251** 
+	 - (c) Ink removers put up in packings for retail sale;...
 
-- **Rank 3** | Score `0.3448`
-  > (2) 45 percent under the build-down method. Korea 17. (A) A change to unwrought germanium or vanadium, germanium or vanadium waste, scrap or powders of subheading 8112.92 from any other chapter; or...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.349** 
+	 - HTS Code: 3824.99.70.00, Mixtures of dibromo neopentyl glycol; Polydibromophenylene oxide; Tetrabromobisphenol-A-carbonate oligomers; and Electroplating chemical and electroless plating solutions and other materials for print...
+- **Score: 0.348** 
+	 - HTS Code: 3809.93, Of a kind used in the leather or like industries:...
+- **Score: 0.320** 
+	 - HTS Code: 3809.92, Of a kind used in the paper or like industries:...
 
-### 📘 Section Notes
-Time taken: `0.008s`
-
-- **Rank 1** | Score `0.6496`
-  > (b) Ferrocerium or other pyrophoric alloys (heading 3606);...
-
-- **Rank 2** | Score `0.3332`
-  > (a) Prepared paints, inks or other products with a basis of metallic flakes or powder (headings 3207 to 3210, 3212, 3213 or 3215);...
-
-- **Rank 3** | Score `0.3036`
-  > In this section the term "pellets" means products which have been agglomerated either directly by compression or by the addition of a binder in a proportion not exceeding 3 percent by weight....
-
-### 📘 Chapter Notes
-Time taken: `0.009s`
-
-- **Rank 1** | Score `0.4342`
-  > Heading 2530 applies, inter alia, to: vermiculite, perlite and chlorites, unexpanded; earth colors, whether or not calcined or mixed together; natural micaceous iron oxides; meerschaum (whether or not in polished pieces); amber; agglomerated meerschaum and agglomerated amber, in plates, rods, sticks...
-
-- **Rank 2** | Score `0.4237`
-  > (b) Natural magnesium carbonate (magnesite), whether or not calcined (heading 2519);...
-
-- **Rank 3** | Score `0.4124`
-  > (e) Slag wool, rock wool or similar mineral wools (heading 6806);...
-
-### 📘 Additional Us Notes
-Time taken: `0.008s`
-
-- **Rank 1** | Score `0.4349`
-  > (c) more than 1.8 percent of iron,...
-
-- **Rank 2** | Score `0.4284`
-  > (a) The term "unwrought" refers to metals, whether or not refined, in the form of ingots, blocks, lumps, billets, cakes, slabs, pigs, cathodes, anodes, briquettes, cubes, sticks, grains, sponge, pellets, shot and similar manufactured primary forms, but does not cover rolled, forged, drawn or extrude...
-
-- **Rank 3** | Score `0.3893`
-  > No allowance or reduction of duties for partial damage or loss in consequence of discoloration or rust occurring before entry shall be made upon iron or steel or upon any article of iron or steel....
-
-### 📘 Tariff Tables
-Time taken: `0.031s`
-
-- **Rank 1** | Score `0.7409`
-  > 2502.00.00.00 Unroasted iron pyrites...
-
-- **Rank 2** | Score `0.6787`
-  > Iron ores and concentrates, other than roasted iron pyrites:...
-
-- **Rank 3** | Score `0.6541`
-  > 2601 Iron ores and concentrates, including roasted iron pyrites:...
-
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.8230
+- **HTS Code:** 7220
+- **Section:** Section XV: BASE METALS AND ARTICLES OF BASE METAL
+- **Chapter:** 72: Iron and steel
+- **Description:** Flat-rolled products of stainless steel, of a width of less than <il>600 mm</il>:...
 
 ---
 
-## 🔍 Query: **milk and cream**
+## Query: Mobile phones
+**Processing Time:** 6.787 seconds
 
-### 📘 General Notes
-Time taken: `0.013s`
+### Closest Section
+- **Name:** Section XVI: MACHINERY AND MECHANICAL APPLIANCES;
+- **Score:** 0.1901
 
-- **Rank 1** | Score `0.4368`
-  > (C) A change to beverages containing milk from any other chapter, except from chapter 4 or from dairy preparations containing over 10 percent by weight of milk solids of subheading 1901.90; or...
+### Closest Chapter Within Section
+- **Name:** 85: Electrical machinery and equipment and parts thereof; sound recorders and reproducers, television image and sound recorders and reproducers, and parts and accessories of such articles
+- **Score:** 0.2201
 
-- **Rank 2** | Score `0.4368`
-  > (c) A change to beverages containing milk from any other chapter, except from chapter 4 or from dairy preparations containing over 10 percent by weight of milk solids of subheading 1901.90; or...
+### Top Notes From Current Chapter
+- **Score: 0.642** 
+	 - For the purposes of heading 8517, the term “smartphones” means telephones for cellular networks, equipped with a mobile operating system designed to perform the functions of an automatic data processi...
+- **Score: 0.285** 
+	 - (a) "Solid-state non-volatile storage devices "(for example,"flash memory cards" or "flash electronic storage cards") are storage devices with a connecting socket, comprising in the same housing one o...
+- **Score: 0.239** 
+	 - (b) The term "smart cards" means cards which have embedded in them one or more electronic integrated circuits (a microprocessor, random access memory (RAM) or read-only memory (ROM)) in the form of ch...
 
-- **Rank 3** | Score `0.4346`
-  > (D) A change to beverages containing milk from any other chapter, except from chapter 4 or from dairy preparations containing over 10 percent by weight of milk solids of subheading 1901.90; or...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.864** 
+	 - HTS Code: 8517.13.00.00, Smartphones...
+- **Score: 0.585** 
+	 - HTS Code: , Telephone sets, including smartphones and other telephones for cellular networks or for other wireless networks :...
+- **Score: 0.543** 
+	 - HTS Code: 8517.18.00.10, Videophones...
 
-### 📘 Section Notes
-Time taken: `0.008s`
-
-- **Rank 1** | Score `0.2023`
-  > (a) Prepared paints, inks or other products with a basis of metallic flakes or powder (headings 3207 to 3210, 3212, 3213 or 3215);...
-
-- **Rank 2** | Score `0.1915`
-  > (b) Human hair or articles of human hair (heading 0501, 6703 or 6704), except filtering or straining cloth of a kind commonly used in oil presses or the like (heading 5911);...
-
-- **Rank 3** | Score `0.1880`
-  > (e) Goods of...
-
-### 📘 Chapter Notes
-Time taken: `0.008s`
-
-- **Rank 1** | Score `0.5685`
-  > The expression "milk" means full cream milk or partially or completely skimmed milk....
-
-- **Rank 2** | Score `0.4594`
-  > (c) Products obtained from milk by replacing one or more of its natural constituents (for example, butyric fats) by another substance (for example, oleic fats) (heading 1901 or 2106); or...
-
-- **Rank 3** | Score `0.4572`
-  > (b) Cocoa butter, fat or oil (heading 1804);...
-
-### 📘 Additional Us Notes
-Time taken: `0.008s`
-
-- **Rank 1** | Score `0.4560`
-  > For the purposes of this schedule, the term "dairy products described in additional U.S. note 1 to chapter 4" means any of the following goods: malted milk, and articles of milk or cream (except (a) white chocolate and (b) inedible dried milk powders certified to be used for calibrating infrared mil...
-
-- **Rank 2** | Score `0.4247`
-  > The aggregate quantity of dried milk and dried cream, whether or not containing added sugar or other sweetening matter, the foregoing goods entered under subheadings 0402.21.75 and 0403.90.61 in any calendar year shall not exceed 99,500 kilograms (articles the product of Mexico shall not be permitte...
-
-- **Rank 3** | Score `0.4182`
-  > The aggregate quantity of milk and cream, fluid or frozen, fresh or sour, containing over 6 percent but not over 45 percent by weight of butterfat, the foregoing goods entered under subheadings 0401.40.05, 0401.50.05 and 0403.90.04 in any calendar year shall not exceed 6,694,840 liters (articles the...
-
-### 📘 Tariff Tables
-Time taken: `0.029s`
-
-- **Rank 1** | Score `0.6909`
-  > Dairy:...
-
-- **Rank 2** | Score `0.6451`
-  > Ice cream:...
-
-- **Rank 3** | Score `0.6437`
-  > Sour cream:...
-
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.8640
+- **HTS Code:** 8517.13.00.00
+- **Section:** Section XVI: MACHINERY AND MECHANICAL APPLIANCES;
+- **Chapter:** 85: Electrical machinery and equipment and parts thereof; sound recorders and reproducers, television image and sound recorders and reproducers, and parts and accessories of such articles
+- **Description:** Smartphones...
 
 ---
 
-## 🔍 Query: **Meat of bovine animals**
+## Query: Footwear with rubber soles
+**Processing Time:** 2.289 seconds
 
-### 📘 General Notes
-Time taken: `0.018s`
+### Closest Section
+- **Name:** Section XII: FOOTWEAR, HEADGEAR, UMBRELLAS, SUN UMBRELLAS,
+- **Score:** 0.3915
 
-- **Rank 1** | Score `0.5037`
-  > (6) animal feeds containing over 10 percent by dry weight of milk solids of subheading 2309.90....
+### Closest Chapter Within Section
+- **Name:** 64: Footwear, gaiters and the like; parts of such articles
+- **Score:** 0.4595
 
-- **Rank 2** | Score `0.4992`
-  > (6) animal feeds containing over 10 percent by weight of milk solids provided for in subheading 2309.90;...
+### Top Notes From Current Chapter
+- **Score: 0.612** 
+	 - (b) Footwear of textile material, without an outer sole glued, sewn or otherwise affixed or applied to the upper (section XI);...
+- **Score: 0.573** 
+	 - (a) Disposable foot or shoe coverings of flimsy material (for example, paper, sheeting of plastics) without applied soles.These products are classified according to their constituent material;...
+- **Score: 0.546** 
+	 - (f) Toy footwear or skating boots with ice or roller skates attached; shin-guards or similar protective sportswear (chapter 95)....
 
-- **Rank 3** | Score `0.4992`
-  > (6) animal feeds containing over 10 percent by weight of milk solids provided for in subheading 2309.90;...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.933** 
+	 - HTS Code: , Footwear with outer soles of rubber or plastics:...
+- **Score: 0.897** 
+	 - HTS Code: 6402, Other footwear with outer soles and uppers of rubber or plastics:...
+- **Score: 0.848** 
+	 - HTS Code: 6404, Footwear with outer soles of rubber, plastics, leather or composition leather and uppers of textile materials:...
 
-### 📘 Section Notes
-Time taken: `0.009s`
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.9326
+- **HTS Code:** 
+- **Section:** Section XII: FOOTWEAR, HEADGEAR, UMBRELLAS, SUN UMBRELLAS,
+- **Chapter:** 64: Footwear, gaiters and the like; parts of such articles
+- **Description:** Footwear with outer soles of rubber or plastics:...
 
-- **Rank 1** | Score `0.2944`
-  > Any reference in this section to a particular genus or species of an animal, except where the context otherwise requires, includes a reference to the young of that genus or species....
+---
 
-- **Rank 2** | Score `0.2894`
-  > (a) Animal brush-making bristles or hair (heading 0502); horsehair or horsehair waste (heading 0511);...
+## Query: Jewelry of precious metals
+**Processing Time:** 1.452 seconds
 
-- **Rank 3** | Score `0.2371`
-  > (c) Cotton linters or other vegetable materials of...
+### Closest Section
+- **Name:** Section XIV: NATURAL OR CULTURED PEARLS, PRECIOUS OR SEMIPRECIOUS STONES, PRECIOUS METALS, METALS
+- **Score:** 0.6609
 
-### 📘 Chapter Notes
-Time taken: `0.009s`
+### Closest Chapter Within Section
+- **Name:** 71: Natural or cultured pearls, precious or semiprecious stones, precious metals, metals clad with precious metal, and articles thereof; imitation jewelry; coin
+- **Score:** 0.6292
 
-- **Rank 1** | Score `0.6090`
-  > (b) Meat of mammals of heading 0106 (heading 0208 or 0210);...
+### Top Notes From Current Chapter
+- **Score: 0.633** 
+	 - (a) The expression "precious metal" means silver, gold and platinum. 71-2 Notes (con.)...
+- **Score: 0.633** 
+	 - (a) The expression "precious metal" means silver, gold and platinum. 71-2 Notes (con.)...
+- **Score: 0.621** 
+	 - (a) Amalgams of precious metal or colloidal precious metal (heading 2843);...
 
-- **Rank 2** | Score `0.5200`
-  > (c) Food preparations containing more than 20 percent by weight of sausage, meat, meat offal, blood, insects, fish or crustaceans, molluscs or other aquatic invertebrates, or any combination thereof (chapter 16);...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.810** 
+	 - HTS Code: 7113, Articles of jewelry and parts thereof, of precious metal or of metal clad with precious metal:...
+- **Score: 0.721** 
+	 - HTS Code: , II. PRECIOUS METALS AND METALS CLAD WITH PRECIOUS METAL...
+- **Score: 0.710** 
+	 - HTS Code: 7115, Other articles of precious metal or of metal clad with precious metal:...
 
-- **Rank 3** | Score `0.4884`
-  > (e) Food preparations, other than the products described in heading 2103 or 2104, containing more than 20 percent by weight of sausage, meat, meat offal, blood, insects, fish or crustaceans, molluscs or other aquatic invertebrates, or any combination thereof (chapter 16);...
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.8101
+- **HTS Code:** 7113
+- **Section:** Section XIV: NATURAL OR CULTURED PEARLS, PRECIOUS OR SEMIPRECIOUS STONES, PRECIOUS METALS, METALS
+- **Chapter:** 71: Natural or cultured pearls, precious or semiprecious stones, precious metals, metals clad with precious metal, and articles thereof; imitation jewelry; coin
+- **Description:** Articles of jewelry and parts thereof, of precious metal or of metal clad with precious metal:...
 
-### 📘 Additional Us Notes
-Time taken: `0.008s`
+---
 
-- **Rank 1** | Score `0.4527`
-  > Food preparations fall in this chapter provided that they contain more than 20 percent by weight of sausage, meat, meat offal, blood, insects, fish or crustaceans, molluscs or other aquatic invertebrates, or any combination thereof. In cases where the preparation contains two or more of the products...
+## Query: Coffee beans, roasted
+**Processing Time:** 0.752 seconds
 
-- **Rank 2** | Score `0.4458`
-  > In assessing the duty on meats, no allowance shall be made for normal components thereof such as bones, fat, and hide or skin. The dutiable weight of meats in airtight containers subject to specific rates includes the entire contents of the containers....
+### Closest Section
+- **Name:** Section II: VEGETABLE PRODUCTS
+- **Score:** 0.2431
 
-- **Rank 3** | Score `0.4049`
-  > This chapter does not cover meat, meal offal, fish, crustaceans, molluscs or other aquatic invertebrates, as well as insects, prepared or preserved by the processes specified in chapter 2 or 3, note 6 to chapter 4 or in heading 0504....
+### Closest Chapter Within Section
+- **Name:** 9: Coffee, tea, maté and spices
+- **Score:** 0.5116
 
-### 📘 Tariff Tables
-Time taken: `0.031s`
+### Top Notes From Current Chapter
+- **Score: 0.153** 
+	 - (b) Mixtures of two or more of the products of different headings are to be classified in heading 0910. The addition of other substances to the products of headings 0904 to 0910 (or to the mixtures re...
+- **Score: 0.144** 
+	 - (a) Mixtures of two or more of the products of the same heading are to be classified in that heading;...
+- **Score: 0.135** 
+	 - This chapter does not cover Cubeb pepper (Pipercubeba) or other products of heading 1211....
 
-- **Rank 1** | Score `0.8729`
-  > Of bovine animals:...
+### Top Tariff Table Rows From Current Chapter
+- **Score: 0.901** 
+	 - HTS Code: , Coffee, roasted:...
+- **Score: 0.848** 
+	 - HTS Code: , Coffee, not roasted:...
+- **Score: 0.597** 
+	 - HTS Code: 0901, Coffee, whether or not roasted or decaffeinated; coffee husks and skins; coffee substitutes containing coffee in any proportion:...
 
-- **Rank 2** | Score `0.8729`
-  > Of bovine animals:...
-
-- **Rank 3** | Score `0.7917`
-  > 0201 Meat of bovine animals, fresh or chilled:...
-
+### Overall Top Tariff Table Row (From all Chapters)
+- **Score:** 0.9006
+- **HTS Code:** 
+- **Section:** Section II: VEGETABLE PRODUCTS
+- **Chapter:** 9: Coffee, tea, maté and spices
+- **Description:** Coffee, roasted:...
 
 ---
 

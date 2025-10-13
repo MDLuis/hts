@@ -5,15 +5,14 @@ All embeddings were generated with [`sentence-transformers`](https://www.sbert.n
 
 ## Notes
 
-- All times measured with `time.time()` before and after `model.encode()`.
+- All times measured with `time.perf_counter()` before and after `model.encode()`.
 - Batch size: 32
 
 ## Results
 
 | Dataset              | # Texts | Model                | Time (seconds) |
 |----------------------|---------|----------------------|----------------|
-| General Notes             |  8765 | all-MiniLM-L6-v2     |     138.33 |
-| Section Notes             |    35 | all-MiniLM-L6-v2     |       1.93 |
-| Chapter Notes             |  1050 | all-MiniLM-L6-v2     |      11.99 |
-| Additional Us Notes       |   537 | all-MiniLM-L6-v2     |      12.07 |
-| Tariff Tables             | 36108 | all-MiniLM-L6-v2     |     230.92 |
+| Section Titles            |    22 | all-MiniLM-L6-v2     |       0.12 |
+| Chapter Titles            |    99 | all-MiniLM-L6-v2     |       1.03 |
+| Chapter Notes             |  1050 | all-MiniLM-L6-v2     |      11.07 |
+| Tariff Tables             | 36108 | all-MiniLM-L6-v2     |     207.18 |
