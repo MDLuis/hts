@@ -1,7 +1,8 @@
-import json, time
+import json, time, re
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 def load_embeddings(prefix: str):
     emb_path = Path(f"embeddings/{prefix}_embeddings_latest.npy")
@@ -54,6 +55,8 @@ def hierarchical_search(
             "top_notes": [],
             "top_tables": [],
             "global_top_table": None,
+            "section_scores": section_scores.cpu().numpy(),
+            "section_labels": section_titles,
         }
 
     filtered_ch_idxs = [i for i, _ in chapters_in_section]
@@ -68,6 +71,13 @@ def hierarchical_search(
     # ---------- Step 3: Top Notes and Tariff Tables within Chapter ----------
     notes_in_chapter = [n for n in notes if n["chapter_title"] == chapter_name_only]
     tables_in_chapter = [t for t in tables if t["chapter_title"] == chapter_name_only]
+    table_scores = None
+    table_labels = None
+    if tables_in_chapter:
+        table_texts = [t["text"] for t in tables_in_chapter]
+        table_embs = model.encode(table_texts, convert_to_tensor=True)
+        table_scores = util.cos_sim(q_emb, table_embs)[0].cpu().numpy()
+        table_labels = [t.get("htsno") for t in tables_in_chapter]
 
     def get_top_results(items):
         if not items:
@@ -83,12 +93,13 @@ def hierarchical_search(
 
     # ---------- Step 4: Global Top Tariff Table Row ----------
     global_top_table = None
-    if global_table_embs is not None and global_table_texts is not None and len(global_table_texts) > 0:
-        all_scores = util.cos_sim(q_emb, global_table_embs)[0]
-        best_idx = int(np.argmax(all_scores))
+    all_table_scores = None
+    if global_table_embs is not None and global_table_texts is not None:
+        all_table_scores = util.cos_sim(q_emb, global_table_embs)[0].cpu().numpy()
+        best_idx = int(np.argmax(all_table_scores))
         global_top_table = {
             "text": global_table_texts[best_idx],
-            "score": float(all_scores[best_idx]),
+            "score": float(all_table_scores[best_idx]),
             "htsno": tables[best_idx].get("htsno"),
             "chapter_title": tables[best_idx].get("chapter_title"),
             "section_title": tables[best_idx].get("section_title"),
@@ -102,6 +113,13 @@ def hierarchical_search(
         "top_notes": top_notes,
         "top_tables": top_tables,
         "global_top_table": global_top_table,
+        "section_scores": section_scores.cpu().numpy(),
+        "section_labels": section_titles,
+        "chapter_scores": chapter_scores.cpu().numpy(),
+        "chapter_labels": [ch for _, ch in chapters_in_section],
+        "chapter_table_scores": table_scores,
+        "chapter_table_labels": table_labels,
+        "global_table_scores": all_table_scores,
     }
 
 
@@ -145,6 +163,98 @@ def generate_report(report_path: str, query_results: dict):
 
             f.write("\n---\n\n")
 
+def extract_number(text, level="generic"):
+    if level == "section":
+        m = re.search(r"Section\s+([IVXLCDM]+)", text)
+        if m:
+            return f"Section {m.group(1)}"
+    elif level == "chapter":
+        m = re.search(r"(\d{1,3})(?::|\s|$)", text.split("|")[-1].strip())
+        if m:
+            return f"Chapter {m.group(1)}"
+    elif level == "table":
+        m = re.search(r"(\d{2,8}(?:\.\d+)*)", text)
+        if m:
+            return f"HTSNO {m.group(1)}"
+    return text.strip()[:15]
+
+def plot_similarity_graph(labels, scores, title, output_path):
+    plt.figure(figsize=(6, 5))
+    plt.bar(labels, scores)
+    plt.ylabel("Cosine Similarity")
+    plt.title(title)
+    plt.ylim(0, 1)
+    plt.xticks(rotation=20, ha="right")
+    plt.tight_layout()
+    plt.savefig(output_path, bbox_inches="tight")
+    plt.close()
+
+def generate_graphs_for_query(query, result, tables):
+    """Create graphs using precomputed similarity scores."""
+    graphs_dir = Path("graphs")
+    graphs_dir.mkdir(exist_ok=True)
+    paths = {}
+
+    # ---- Sections ----
+    section_scores = result["section_scores"]
+    section_labels = [extract_number(s, "section") for s in result["section_labels"]]
+    top_idx = np.argsort(-section_scores)[:5]
+    path = graphs_dir / f"{query.replace(' ', '_')}_sections.png"
+    plot_similarity_graph([section_labels[i] for i in top_idx], section_scores[top_idx], f"Top 5 Sections – {query}", path)
+    paths["sections"] = path
+
+    # ---- Chapters ----
+    if "chapter_scores" in result:
+        chapter_scores = result["chapter_scores"]
+        chapter_labels = [extract_number(ch, "chapter") for ch in result["chapter_labels"]]
+        top_idx = np.argsort(-chapter_scores)[:5]
+        path = graphs_dir / f"{query.replace(' ', '_')}_chapters.png"
+        plot_similarity_graph([chapter_labels[i] for i in top_idx], chapter_scores[top_idx], f"Top 5 Chapters in {extract_number(result['section'], 'section')}", path)
+        paths["chapters"] = path
+
+    # ---- Tables within Chapter ----
+    if "chapter_table_scores" in result and result["chapter_table_scores"] is not None:
+        tbl_scores = result["chapter_table_scores"]
+        tbl_labels = [
+            extract_number(htsno or f"Row{i}", "table")
+            for i, htsno in enumerate(result["chapter_table_labels"])
+        ]
+        top_idx = np.argsort(-tbl_scores)[:5]
+        path = graphs_dir / f"{query.replace(' ', '_')}_tables.png"
+        plot_similarity_graph(
+            [tbl_labels[i] for i in top_idx],
+            tbl_scores[top_idx],
+            f"Top 5 Tables Rows in {extract_number(result['chapter'], 'chapter')}",
+            path
+        )
+        paths["tables"] = path
+
+    # ---- Global Tables ----
+    if "global_table_scores" in result and result["global_table_scores"] is not None:
+        global_scores = result["global_table_scores"]
+        top_idx = np.argsort(-global_scores)[:5]
+        global_labels = [extract_number(tables[i].get("htsno", f"Row{i}"), "table") for i in top_idx]
+        path = graphs_dir / f"{query.replace(' ', '_')}_global.png"
+        plot_similarity_graph(global_labels, global_scores[top_idx],"Top 5 Overall Tables Rows (All Chapters)", path)
+        paths["global"] = path
+
+    return paths
+
+def write_graphs_markdown(md_path, graph_files):
+    """Write Markdown file embedding all generated graph images."""
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write("# HTS Hierarchical Similarity Graphs\n\n")
+        for query, paths in graph_files.items():
+            f.write(f"## Query: {query}\n\n")
+            for label, path in paths.items():
+                f.write(f"**{label.title()} Graph:**\n\n![]({path})\n\n")
+            f.write("\n---\n\n")
+
+def generate_graphs(output_path, query_results, tables):
+    graph_files = {}
+    for query, result in query_results.items():
+        graph_files[query] = generate_graphs_for_query(query, result, tables)
+    write_graphs_markdown(output_path, graph_files)
 
 # ---------- Main ----------
 def main():
@@ -187,15 +297,15 @@ def main():
             notes,
             tables,
             top_k=3,
-            global_table_embs=all_table_embs,   
-            global_table_texts=all_table_texts, 
+            global_table_embs=all_table_embs,
+            global_table_texts=all_table_texts,
         )
-        elapsed = time.perf_counter() - start
-        result["time_taken"] = elapsed
+        result["time_taken"] = time.perf_counter() - start
         query_results[q] = result
 
     # Generate Markdown report
     generate_report("query_report.md", query_results)
+    generate_graphs("graphs.md", query_results, tables)
 
 if __name__ == "__main__":
     main()
