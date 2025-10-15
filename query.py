@@ -240,22 +240,114 @@ def generate_graphs_for_query(query, result, tables):
 
     return paths
 
-def write_graphs_markdown(md_path, graph_files):
+def write_graphs_markdown(md_path, title, graph_files):
     """Write Markdown file embedding all generated graph images."""
     with open(md_path, "w", encoding="utf-8") as f:
-        f.write("# HTS Hierarchical Similarity Graphs\n\n")
+        f.write(f"# {title}\n\n")
         for query, paths in graph_files.items():
             f.write(f"## Query: {query}\n\n")
             for label, path in paths.items():
-                f.write(f"**{label.title()} Graph:**\n\n![]({path})\n\n")
+                f.write(f"**{label.replace('_', ' ').title()}:**\n\n![]({path.as_posix()})\n\n")
             f.write("\n---\n\n")
 
 def generate_graphs(output_path, query_results, tables):
     graph_files = {}
     for query, result in query_results.items():
         graph_files[query] = generate_graphs_for_query(query, result, tables)
-    write_graphs_markdown(output_path, graph_files)
+    write_graphs_markdown(output_path, "HTS Hierarchical Similarity Graphs", graph_files)
 
+def plot_trend_graph(scores, title, output_path):
+    colors = ["royalblue", "darkorange"]
+    bar_colors = [colors[i % 2] for i in range(len(scores))]
+    plt.figure(figsize=(8, 4))
+    plt.bar(range(len(scores)), scores, color=bar_colors)
+    plt.ylabel("Cosine Similarity")
+    plt.title(title)
+    plt.ylim(0, 1)
+    plt.xticks([]) 
+    plt.tight_layout()
+    plt.savefig(output_path, bbox_inches="tight")
+    plt.close()
+
+def generate_table_trend_graphs_for_query(query, result, tables):
+    graphs_dir = Path("trend_graphs")
+    graphs_dir.mkdir(exist_ok=True)
+    paths = {}
+    # Chapter trend
+    if "chapter_table_scores" in result and result["chapter_table_scores"] is not None:
+        tbl_scores = result["chapter_table_scores"]
+        path = graphs_dir / f"{query.replace(' ', '_')}_chapter_trend.png"
+        plot_trend_graph(
+            tbl_scores,
+            f"Table Similarity Trend – {extract_number(result['chapter'], 'chapter')}",
+            path
+        )
+        paths["chapter_trend"] = path
+
+    # All chapters trend
+    all_ch_paths = generate_all_chapters_trend_graph_for_query(query, result, tables)
+    paths.update(all_ch_paths)
+
+    return paths
+
+def generate_table_trend_graphs(output_path, query_results, tables):
+    trend_graph_files = {}
+    for query, result in query_results.items():
+        trend_graph_files[query] = generate_table_trend_graphs_for_query(query, result, tables)
+    write_graphs_markdown(output_path,"HTS Table Similarity Trend Graphs",trend_graph_files)
+
+def plot_all_chapters_trend_graph(all_scores, all_labels, title, output_path):
+    plt.figure(figsize=(12, 4))
+    chapters = [label.split("|")[-1].strip() for label in all_labels]
+    unique_chapters = []
+    chapter_indices = []
+    last_ch = None
+    for i, ch in enumerate(chapters):
+        if ch != last_ch:
+            unique_chapters.append(ch)
+            chapter_indices.append(i)
+            last_ch = ch
+    chapter_indices.append(len(chapters))
+    # two alternating colors for points
+    colors = ["#3b82f6", "#f97316"]
+    # plot each chapter segment with its color
+    for i in range(len(unique_chapters)):
+        start = chapter_indices[i]
+        end = chapter_indices[i + 1]
+        color = colors[i % 2]
+        plt.scatter(
+            np.arange(start, end),
+            all_scores[start:end],
+            s=2,
+            color=color,
+            alpha=0.7,
+        )
+    plt.ylabel("Cosine Similarity")
+    plt.title(title)
+    plt.xlim(-len(all_scores)*0.01, len(all_scores) - 1 + (len(all_scores)*0.01))
+    plt.ylim(0, 1)
+    plt.xticks([])
+    plt.tight_layout()
+    plt.savefig(output_path, bbox_inches="tight", dpi=200)
+    plt.close()
+
+def generate_all_chapters_trend_graph_for_query(query, result, tables):
+    graphs_dir = Path("trend_graphs")
+    graphs_dir.mkdir(exist_ok=True)
+    paths = {}
+    if "global_table_scores" in result and result["global_table_scores"] is not None:
+        scores = result["global_table_scores"]
+        labels = [t["chapter_title"] for t in tables]
+        path = graphs_dir / f"{query.replace(' ', '_')}_all_chapters_trend.png"
+        plot_all_chapters_trend_graph(
+            scores,
+            labels,
+            f"Similarity Trend Across All Chapters – {query}",
+            path
+        )
+        paths["all_chapters_trend"] = path
+
+    return paths
 # ---------- Main ----------
 def main():
     model_name = "all-MiniLM-L6-v2"
@@ -306,6 +398,7 @@ def main():
     # Generate Markdown report
     generate_report("query_report.md", query_results)
     generate_graphs("graphs.md", query_results, tables)
+    generate_table_trend_graphs("trend_graphs.md", query_results, tables)
 
 if __name__ == "__main__":
     main()

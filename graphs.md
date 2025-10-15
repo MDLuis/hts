@@ -2,19 +2,19 @@
 
 ## Query: Meat of bovine animals
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Meat_of_bovine_animals_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Meat_of_bovine_animals_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Meat_of_bovine_animals_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Meat_of_bovine_animals_global.png)
 
@@ -23,19 +23,19 @@
 
 ## Query: Wheat and meslin
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Wheat_and_meslin_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Wheat_and_meslin_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Wheat_and_meslin_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Wheat_and_meslin_global.png)
 
@@ -44,19 +44,19 @@
 
 ## Query: Silk fabrics
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Silk_fabrics_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Silk_fabrics_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Silk_fabrics_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Silk_fabrics_global.png)
 
@@ -65,19 +65,19 @@
 
 ## Query: Passenger motor vehicles
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Passenger_motor_vehicles_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Passenger_motor_vehicles_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Passenger_motor_vehicles_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Passenger_motor_vehicles_global.png)
 
@@ -86,19 +86,19 @@
 
 ## Query: Medicaments containing antibiotics
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Medicaments_containing_antibiotics_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Medicaments_containing_antibiotics_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Medicaments_containing_antibiotics_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Medicaments_containing_antibiotics_global.png)
 
@@ -107,19 +107,19 @@
 
 ## Query: Flat-rolled products of stainless steel
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Flat-rolled_products_of_stainless_steel_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Flat-rolled_products_of_stainless_steel_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Flat-rolled_products_of_stainless_steel_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Flat-rolled_products_of_stainless_steel_global.png)
 
@@ -128,19 +128,19 @@
 
 ## Query: Mobile phones
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Mobile_phones_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Mobile_phones_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Mobile_phones_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Mobile_phones_global.png)
 
@@ -149,19 +149,19 @@
 
 ## Query: Footwear with rubber soles
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Footwear_with_rubber_soles_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Footwear_with_rubber_soles_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Footwear_with_rubber_soles_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Footwear_with_rubber_soles_global.png)
 
@@ -170,19 +170,19 @@
 
 ## Query: Jewelry of precious metals
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Jewelry_of_precious_metals_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Jewelry_of_precious_metals_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Jewelry_of_precious_metals_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Jewelry_of_precious_metals_global.png)
 
@@ -191,19 +191,19 @@
 
 ## Query: Coffee beans, roasted
 
-**Sections Graph:**
+**Sections:**
 
 ![](graphs/Coffee_beans,_roasted_sections.png)
 
-**Chapters Graph:**
+**Chapters:**
 
 ![](graphs/Coffee_beans,_roasted_chapters.png)
 
-**Tables Graph:**
+**Tables:**
 
 ![](graphs/Coffee_beans,_roasted_tables.png)
 
-**Global Graph:**
+**Global:**
 
 ![](graphs/Coffee_beans,_roasted_global.png)
 
