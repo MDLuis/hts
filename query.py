@@ -3,6 +3,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer, util
 from pathlib import Path
 import matplotlib.pyplot as plt
+from llama import load_llama, analyze_best_hts
 
 def load_embeddings(prefix: str):
     emb_path = Path(f"embeddings/{prefix}_embeddings_latest.npy")
@@ -27,6 +28,8 @@ def hierarchical_search(
     top_k=3,
     global_table_embs=None,
     global_table_texts=None,
+    global_note_embs=None,
+    global_note_texts=None,
 ):
     """
     Hierarchical semantic search for HTS queries:
@@ -55,6 +58,7 @@ def hierarchical_search(
             "top_notes": [],
             "top_tables": [],
             "global_top_table": None,
+            "global_top_notes": [],
             "section_scores": section_scores.cpu().numpy(),
             "section_labels": section_titles,
         }
@@ -105,6 +109,22 @@ def hierarchical_search(
             "section_title": tables[best_idx].get("section_title"),
         }
 
+    # ---------- Step 5: Global Top Notes ----------
+    global_top_notes = []
+    all_note_scores = None
+    if global_note_embs is not None and global_note_texts is not None:
+        all_note_scores = util.cos_sim(q_emb, global_note_embs)[0].cpu().numpy()
+        top_idx = np.argsort(-all_note_scores)[:top_k]
+        global_top_notes = [
+            {
+                "text": global_note_texts[i],
+                "score": float(all_note_scores[i]),
+                "chapter_title": notes[i].get("chapter_title"),
+                "section_title": notes[i].get("section_title"),
+            }
+            for i in top_idx
+        ]
+
     return {
         "section": best_section,
         "section_score": best_section_score,
@@ -112,6 +132,7 @@ def hierarchical_search(
         "chapter_score": best_chapter_score,
         "top_notes": top_notes,
         "top_tables": top_tables,
+        "global_top_notes": global_top_notes,
         "global_top_table": global_top_table,
         "section_scores": section_scores.cpu().numpy(),
         "section_labels": section_titles,
@@ -120,6 +141,7 @@ def hierarchical_search(
         "chapter_table_scores": table_scores,
         "chapter_table_labels": table_labels,
         "global_table_scores": all_table_scores,
+        "global_note_scores": all_note_scores,
     }
 
 
@@ -348,6 +370,16 @@ def generate_all_chapters_trend_graph_for_query(query, result, tables):
         paths["all_chapters_trend"] = path
 
     return paths
+
+def generate_llama_report(output_path, llama_results):
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("# Llama 3.2-3B Reasoning Results\n\n")
+        for query, result in llama_results.items():
+            f.write(f"## Query: {query}\n")
+            f.write(f"**Processing Time:** {result['time_taken']:.2f} seconds\n\n")
+            f.write(result["explanation"].strip())
+            f.write("\n\n---\n\n")
+
 # ---------- Main ----------
 def main():
     model_name = "all-MiniLM-L6-v2"
@@ -362,6 +394,8 @@ def main():
     # Precompute all tariff table embeddings once
     all_table_texts = [t["text"] for t in tables]
     all_table_embs = model.encode(all_table_texts, convert_to_tensor=True)
+    all_note_texts = [n["text"] for n in notes]
+    all_note_embs = model.encode(all_note_texts, convert_to_tensor=True)
 
     queries = [
         "Meat of bovine animals",
@@ -391,6 +425,8 @@ def main():
             top_k=3,
             global_table_embs=all_table_embs,
             global_table_texts=all_table_texts,
+            global_note_embs=all_note_embs,
+            global_note_texts=all_note_texts,
         )
         result["time_taken"] = time.perf_counter() - start
         query_results[q] = result
@@ -399,6 +435,49 @@ def main():
     generate_report("query_report.md", query_results)
     generate_graphs("graphs.md", query_results, tables)
     generate_table_trend_graphs("trend_graphs.md", query_results, tables)
+
+    # ---------- Run Llama reasoning for selected queries ----------
+    llama_queries = ["Silk fabrics", "Medicaments containing antibiotics"]
+    llama_pipe = load_llama()
+    llama_results = {}
+
+    for q in llama_queries:
+        print(f"\n[LLAMA] Evaluating: {q}")
+        res = query_results[q]
+
+        global_notes = res.get("global_top_notes", [])
+        global_tables = []
+
+        # Use top 5 tables by similarity if available
+        if res.get("global_table_scores") is not None and res.get("global_table_texts") is not None:
+            scores = np.array(res["global_table_scores"])
+            texts = res["global_table_texts"]
+            top_idx = np.argsort(-scores)[:10]
+            global_tables = [
+                {
+                    "text": texts[i],
+                    "score": float(scores[i]),
+                    "htsno": tables[i].get("htsno"),
+                    "chapter_title": tables[i].get("chapter_title"),
+                }
+                for i in top_idx
+            ]
+        elif res.get("global_top_table"):
+            global_tables = [res["global_top_table"]]
+
+        llama_text, llama_time = analyze_best_hts(
+            llama_pipe,
+            query=q,
+            notes=global_notes,
+            tables=global_tables,
+        )
+
+        llama_results[q] = {
+            "explanation": llama_text,
+            "time_taken": llama_time,
+        }
+
+    generate_llama_report("llama.md", llama_results)
 
 if __name__ == "__main__":
     main()

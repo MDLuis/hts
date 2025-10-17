@@ -1,7 +1,7 @@
 # HTS Hierarchical Embedding Query Report
 
 ## Query: Meat of bovine animals
-**Processing Time:** 1.417 seconds
+**Processing Time:** 1.560 seconds
 
 ### Closest Section
 - **Name:** Section I: LIVE ANIMALS; ANIMAL PRODUCTS
@@ -37,7 +37,7 @@
 ---
 
 ## Query: Wheat and meslin
-**Processing Time:** 1.887 seconds
+**Processing Time:** 2.048 seconds
 
 ### Closest Section
 - **Name:** Section IV: PREPARED FOODSTUFFS; BEVERAGES, SPIRITS AND VINEGAR;TOBACCO AND MANUFACTURED
@@ -73,7 +73,7 @@
 ---
 
 ## Query: Silk fabrics
-**Processing Time:** 0.493 seconds
+**Processing Time:** 0.675 seconds
 
 ### Closest Section
 - **Name:** Section XI: TEXTILES AND TEXTILE ARTICLES
@@ -104,7 +104,7 @@
 ---
 
 ## Query: Passenger motor vehicles
-**Processing Time:** 4.518 seconds
+**Processing Time:** 4.744 seconds
 
 ### Closest Section
 - **Name:** Section XVII: VEHICLES, AIRCRAFT, VESSELS AND ASSOCIATED
@@ -140,7 +140,7 @@
 ---
 
 ## Query: Medicaments containing antibiotics
-**Processing Time:** 3.079 seconds
+**Processing Time:** 3.257 seconds
 
 ### Closest Section
 - **Name:** Section IV: PREPARED FOODSTUFFS; BEVERAGES, SPIRITS AND VINEGAR;TOBACCO AND MANUFACTURED
@@ -176,7 +176,7 @@
 ---
 
 ## Query: Flat-rolled products of stainless steel
-**Processing Time:** 6.147 seconds
+**Processing Time:** 6.537 seconds
 
 ### Closest Section
 - **Name:** Section VI: PRODUCTS OF THE CHEMICAL OR ALLIED INDUSTRIES
@@ -212,7 +212,7 @@
 ---
 
 ## Query: Mobile phones
-**Processing Time:** 11.769 seconds
+**Processing Time:** 12.733 seconds
 
 ### Closest Section
 - **Name:** Section XVI: MACHINERY AND MECHANICAL APPLIANCES;
@@ -248,7 +248,7 @@
 ---
 
 ## Query: Footwear with rubber soles
-**Processing Time:** 4.497 seconds
+**Processing Time:** 4.528 seconds
 
 ### Closest Section
 - **Name:** Section XII: FOOTWEAR, HEADGEAR, UMBRELLAS, SUN UMBRELLAS,
@@ -284,7 +284,7 @@
 ---
 
 ## Query: Jewelry of precious metals
-**Processing Time:** 2.362 seconds
+**Processing Time:** 2.413 seconds
 
 ### Closest Section
 - **Name:** Section XIV: NATURAL OR CULTURED PEARLS, PRECIOUS OR SEMIPRECIOUS STONES, PRECIOUS METALS, METALS
@@ -320,7 +320,7 @@
 ---
 
 ## Query: Coffee beans, roasted
-**Processing Time:** 1.414 seconds
+**Processing Time:** 1.458 seconds
 
 ### Closest Section
 - **Name:** Section II: VEGETABLE PRODUCTS
