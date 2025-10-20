@@ -105,3 +105,9 @@ class GeneralNote(BaseModel):
 class HTSData(BaseModel):
     general_notes: List[GeneralNote]
     sections: List[Section]
+
+class Ruling(BaseModel):
+    id: str
+    hts_code: str
+    prefix: str
+    text: str

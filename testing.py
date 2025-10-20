@@ -1,6 +1,7 @@
 from src.notes import GeneralNotesSource, SectionNotesSource, ChapterNotesSource, AdditionalUSNotesSource
 from src.ingest import HTSSource
 from src.tables import TariffTableSource
+from src.rulings import Rulings
 def main():
     # # Testing the ingest of Sections and Chapters
     # source = HTSSource()
@@ -44,19 +45,19 @@ def main():
     #     print(f"Chapter {chapter_notes.chapter_number} has {len(chapter_notes.notes)} notes")
     # src.save(results)
 
-    # Testing for additional notes  body = re.sub(r"\n+", " ", body).strip()
-    src = AdditionalUSNotesSource()
-    results = []
-    for ch in range(1,10):
-        if ch != 77:
-            pdf_path = src.fetch(ch)
-            additional_notes = src.parse(pdf_path)
-            if additional_notes:
-                results.append(additional_notes)
-                print(f"Chapter {additional_notes.chapter_number} has {len(additional_notes.notes)} notes")
-            else:
-                print(f"No additional u.s. notes in chapter {ch}")
-    src.save(results)
+    # # Testing for additional notes  body = re.sub(r"\n+", " ", body).strip()
+    # src = AdditionalUSNotesSource()
+    # results = []
+    # for ch in range(1,10):
+    #     if ch != 77:
+    #         pdf_path = src.fetch(ch)
+    #         additional_notes = src.parse(pdf_path)
+    #         if additional_notes:
+    #             results.append(additional_notes)
+    #             print(f"Chapter {additional_notes.chapter_number} has {len(additional_notes.notes)} notes")
+    #         else:
+    #             print(f"No additional u.s. notes in chapter {ch}")
+    # src.save(results)
 
     # # Testing for tariff tables
     # src = TariffTableSource()
@@ -67,6 +68,11 @@ def main():
     #     results.append(tariff_table)
     # src.save(results)
 
+    # Testing rulings
+    rulings = Rulings()
+    hts, path = rulings.fetch("6214.10.1000")
+    parsed_rulings = rulings.parse(hts, path)
+    rulings.save(parsed_rulings, hts)
 
 if __name__ == "__main__":
     main()
