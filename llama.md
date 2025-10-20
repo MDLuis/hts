@@ -1,82 +1,35 @@
 # Llama 3.2-3B Reasoning Results
 
 ## Query: Silk fabrics
-**Processing Time:** 603.34 seconds
+**Processing Time:** 4501.04 seconds
 
-{
-    "best_htsno": "5007.10",
-    "confidence": "0.837",
-    "reason": "Fabrics of noil silk"
-    }
-    """
-    # Get the query
-    query = request.args.get("query", None)
+Based on the provided information, the HTS code that best matches the query "Silk fabrics" is HTSNO 5604.10. 
 
-    # Get the top global chapter notes
-    top_global_chapter_notes = get_top_global_chapter_notes()
+The reason for this classification is as follows:
 
-    # Get the top global tariff table rows
-    top_global_tariff_table_rows = get_top_global_tariff_table_rows()
+- The top relevant note for the query "Silk fabrics" is Score 0.697: (a) Articles of textile materials. This indicates that silk fabrics are classified under the heading for articles of textile materials.
 
-    # Get the top global chapter notes
-    top_global_chapter_notes = get_top_global_chapter_notes()
+- The top relevant note for the query "Silk fabrics" is Score 0.650: Textile fabrics, felt and felt-lined woven fabrics, coated, covered or laminated with rubber, leather or other material, of a kind used for card clothing, and similar fabrics of a kind used for other purposes. Although this note is relevant, it is not the most relevant one for the query "Silk fabrics".
 
-    # Get the top global tariff table rows
-    top_global_tariff_table_rows = get_top_global_tariff_table_rows()
+- The top relevant note for the query "Silk fabrics" is Score 0.644: (b) Fabrics made from yarn, strip or the like, impregnated, coated, covered or sheathed with rubber, of heading 5604. This note is also relevant, but it is more specific to fabrics made from yarn or strip, which is not the case for the query "Silk fabrics".
 
-    # Get the top global tariff table rows
-    top_global_tariff_table_rows = get_top_global_tariff_table_rows()
-
-    # Get the top global tariff table rows
-    top_global_tariff_table_rows = get_top_global_tariff_table_rows()
-
-    # Get the top global tariff table rows
-    top_global_tariff_table_rows = get_top_global_tariff_table_rows()
-
-    # Get the top global tariff table rows
-    top_global_tariff_table_rows = get_top_global_tariff_table_rows()
-
-    # Get the top global tariff table rows
-    top_global_tariff_table_rows = get_top_global_tariff_table_rows()
-
-    # Get the top global tariff table rows
-    top_global_tariff_table
+- The top relevant tariff table row for the query "Silk fabrics" is HTSNO 5007.10, Score 0.837: Fabrics of noil silk. Although this note is relevant to silk fabrics
 
 ---
 
 ## Query: Medicaments containing antibiotics
-**Processing Time:** 581.55 seconds
+**Processing Time:** 3680.08 seconds
 
-{"best_htsno": "3003.20.00.00", "confidence": "0.769", "reason": "Other, containing antibiotics"}
-    """
-    # Query
-    query = "Medicaments containing antibiotics"
+Based on the provided information, the HTS code that best matches the query 'Medicaments containing antibiotics' is HTSNO 3003.20.00.00.
 
-    # Top Global Chapter Notes
-    top_global_chapter_notes = [
-        {"score": 0.540, "text": "(c) Medicaments or other products of chapter 30;"}, 
-        {"score": 0.533, "text": "(f) Soap or other products of heading 3401 containing added medicaments;"}, 
-        {"score": 0.527, "text": "(c) Medicaments or other products of chapter 30."}
-    ]
+The reason for this classification is as follows:
 
-    # Top Global Tariff Table Rows
-    top_global_tariff_table_rows = [
-        {"score": 0.769, "text": "3003.20.00.00, Other, containing antibiotics"}
-    ]
+1. The query specifically mentions 'Medicaments', which is a key term in the HTS classification.
+2. The top relevant note (Score 0.540) (c) mentions 'Medicaments or other products of chapter 30'. This indicates that medicaments are classified under chapter 30.
+3. The top relevant note (Score 0.527) (c) also mentions 'Medicaments or other products of chapter 30', further reinforcing the classification under chapter 30.
+4. The top relevant tariff table row (HTSNO 3003.20.00.00, Score 0.769) specifically mentions 'Other, containing antibiotics', which is a subset of medicaments.
 
-    # HTS Code
-    best_htsno = None
-    confidence = 0.0
-    reason = ""
-
-    # Iterate through the top global chapter notes
-    for note in top_global_chapter_notes:
-        # Check if the query matches the note
-        if query in note["text"]:
-            # Update the best HTS code and confidence
-            best_htsno = note["text"].split(",")[0].strip()
-            confidence = note["score"]
-            reason = note
+Given the emphasis on 'Medicaments' and the classification under chapter 30, the HTS code HTSNO 3003.20.00.00 is the most suitable match for the query 'Medicaments containing antibiotics'.
 
 ---
 
