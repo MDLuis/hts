@@ -14,11 +14,11 @@ def load_llama():
 
 def analyze_best_hts(pipe, query, notes, tables):
     notes_text = "\n".join([
-        f"- Score {n['score']:.3f}: {n['text'][:200]}" for n in notes
+        f"- [Chapter: {n.get('chapter_title', 'N/A')}] Score {n['score']:.3f}: {n['text'][:200]}" for n in notes
     ]) or "No notes available."
 
     tables_text = "\n".join([
-        f"- HTSNO {t.get('htsno', 'N/A')}, Score {t['score']:.3f}: {t['text'][:200]}"
+        f"- [Chapter: {t.get('chapter_title', 'N/A')}] HTSNO {t.get('htsno', 'N/A')}, Score {t['score']:.3f}: {t['text'][:200]}"
         for t in tables
     ]) or "No tables available."
 
