@@ -28,8 +28,6 @@ def hierarchical_search(
     top_k=3,
     global_table_embs=None,
     global_table_texts=None,
-    global_note_embs=None,
-    global_note_texts=None,
 ):
     """
     Hierarchical semantic search for HTS queries:
@@ -58,7 +56,7 @@ def hierarchical_search(
             "top_notes": [],
             "top_tables": [],
             "global_top_table": None,
-            "global_top_notes": [],
+            "notes_for_top_global_tables": [],
             "section_scores": section_scores.cpu().numpy(),
             "section_labels": section_titles,
         }
@@ -109,21 +107,26 @@ def hierarchical_search(
             "section_title": tables[best_idx].get("section_title"),
         }
 
-    # ---------- Step 5: Global Top Notes ----------
-    global_top_notes = []
-    all_note_scores = None
-    if global_note_embs is not None and global_note_texts is not None:
-        all_note_scores = util.cos_sim(q_emb, global_note_embs)[0].cpu().numpy()
-        top_idx = np.argsort(-all_note_scores)[:top_k]
-        global_top_notes = [
-            {
-                "text": global_note_texts[i],
-                "score": float(all_note_scores[i]),
-                "chapter_title": notes[i].get("chapter_title"),
-                "section_title": notes[i].get("section_title"),
-            }
-            for i in top_idx
-        ]
+    notes_for_top_global_tables = []
+    if all_table_scores is not None:
+        top_table_idx = np.argsort(-all_table_scores)
+        chapters_in_top_tables = {tables[i]["chapter_title"] for i in top_table_idx if tables[i].get("chapter_title")}
+
+        matching_notes = [n for n in notes if n["chapter_title"] in chapters_in_top_tables]
+        if matching_notes:
+            note_texts = [n["text"] for n in matching_notes]
+            note_embs = model.encode(note_texts, convert_to_tensor=True)
+            note_scores = util.cos_sim(q_emb, note_embs)[0].cpu().numpy()
+            top_note_idx = np.argsort(-note_scores)[:15]
+            notes_for_top_global_tables = [
+                {
+                    "text": note_texts[i],
+                    "score": float(note_scores[i]),
+                    "chapter_title": matching_notes[i]["chapter_title"],
+                    "section_title": matching_notes[i]["section_title"],
+                }
+                for i in top_note_idx
+            ]
 
     return {
         "section": best_section,
@@ -132,8 +135,8 @@ def hierarchical_search(
         "chapter_score": best_chapter_score,
         "top_notes": top_notes,
         "top_tables": top_tables,
-        "global_top_notes": global_top_notes,
         "global_top_table": global_top_table,
+        "notes_for_top_global_tables": notes_for_top_global_tables,
         "section_scores": section_scores.cpu().numpy(),
         "section_labels": section_titles,
         "chapter_scores": chapter_scores.cpu().numpy(),
@@ -141,7 +144,6 @@ def hierarchical_search(
         "chapter_table_scores": table_scores,
         "chapter_table_labels": table_labels,
         "global_table_scores": all_table_scores,
-        "global_note_scores": all_note_scores,
     }
 
 
@@ -425,8 +427,6 @@ def main():
             top_k=3,
             global_table_embs=all_table_embs,
             global_table_texts=all_table_texts,
-            global_note_embs=all_note_embs,
-            global_note_texts=all_note_texts,
         )
         result["time_taken"] = time.perf_counter() - start
         query_results[q] = result
@@ -437,7 +437,7 @@ def main():
     generate_table_trend_graphs("trend_graphs.md", query_results, tables)
 
     # ---------- Run Llama reasoning for selected queries ----------
-    llama_queries = ["Silk fabrics", "Medicaments containing antibiotics"]
+    llama_queries = ["Silk fabrics", "Medicaments containing antibiotics", "Meat of bovine animals"]
     llama_pipe = load_llama()
     llama_results = {}
 
@@ -445,14 +445,11 @@ def main():
         print(f"\n[LLAMA] Evaluating: {q}")
         res = query_results[q]
 
-        global_notes = res.get("global_top_notes", [])
         global_tables = []
-
-        # Use top 5 tables by similarity if available
         if res.get("global_table_scores") is not None and res.get("global_table_texts") is not None:
             scores = np.array(res["global_table_scores"])
             texts = res["global_table_texts"]
-            top_idx = np.argsort(-scores)[:10]
+            top_idx = np.argsort(-scores)
             global_tables = [
                 {
                     "text": texts[i],
@@ -465,10 +462,12 @@ def main():
         elif res.get("global_top_table"):
             global_tables = [res["global_top_table"]]
 
+        filtered_notes = res.get("notes_for_top_global_tables", [])
+
         llama_text, llama_time = analyze_best_hts(
             llama_pipe,
             query=q,
-            notes=global_notes,
+            notes=filtered_notes,
             tables=global_tables,
         )
 
