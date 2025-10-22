@@ -3,7 +3,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer, util
 from pathlib import Path
 import matplotlib.pyplot as plt
-from llama import load_llama, analyze_best_hts
+from llama import load_llama, analyze_hts
 
 def load_embeddings(prefix: str):
     emb_path = Path(f"embeddings/{prefix}_embeddings_latest.npy")
@@ -109,7 +109,7 @@ def hierarchical_search(
 
     notes_for_top_global_tables = []
     if all_table_scores is not None:
-        top_table_idx = np.argsort(-all_table_scores)
+        top_table_idx = np.argsort(-all_table_scores)[:10]
         chapters_in_top_tables = {tables[i]["chapter_title"] for i in top_table_idx if tables[i].get("chapter_title")}
 
         matching_notes = [n for n in notes if n["chapter_title"] in chapters_in_top_tables]
@@ -117,7 +117,7 @@ def hierarchical_search(
             note_texts = [n["text"] for n in matching_notes]
             note_embs = model.encode(note_texts, convert_to_tensor=True)
             note_scores = util.cos_sim(q_emb, note_embs)[0].cpu().numpy()
-            top_note_idx = np.argsort(-note_scores)[:15]
+            top_note_idx = np.argsort(-note_scores)[:10]
             notes_for_top_global_tables = [
                 {
                     "text": note_texts[i],
@@ -437,7 +437,7 @@ def main():
     generate_table_trend_graphs("trend_graphs.md", query_results, tables)
 
     # ---------- Run Llama reasoning for selected queries ----------
-    llama_queries = ["Silk fabrics", "Medicaments containing antibiotics", "Meat of bovine animals"]
+    llama_queries = ["Silk fabrics", "Medicaments containing antibiotics"]
     llama_pipe = load_llama()
     llama_results = {}
 
@@ -449,7 +449,7 @@ def main():
         if res.get("global_table_scores") is not None and res.get("global_table_texts") is not None:
             scores = np.array(res["global_table_scores"])
             texts = res["global_table_texts"]
-            top_idx = np.argsort(-scores)
+            top_idx = np.argsort(-scores)[:10]
             global_tables = [
                 {
                     "text": texts[i],
@@ -464,7 +464,7 @@ def main():
 
         filtered_notes = res.get("notes_for_top_global_tables", [])
 
-        llama_text, llama_time = analyze_best_hts(
+        llama_text, llama_time = analyze_hts(
             llama_pipe,
             query=q,
             notes=filtered_notes,
