@@ -12,7 +12,7 @@ def load_llama():
     )
     return pipe
 
-def analyze_hts(pipe, query, notes, tables):
+def analyze_hts(query, notes, tables):
     notes_text = "\n".join([
         f"- [Chapter: {n.get('chapter_title', 'N/A')}] Score {n['score']:.3f}: {n['text'][:200]}" for n in notes
     ]) or "No notes available."
@@ -46,7 +46,9 @@ def analyze_hts(pipe, query, notes, tables):
             "content": f"Query: '{query}'\n\nTop Relevant Notes:\n{notes_text}\n\nTop Relevant Tariff Table Rows:\n{tables_text}\n\nBased on this, reflect on what information is missing."
         },
     ]
+    return messages
 
+def chat_llama(pipe, messages):
     start = time.perf_counter()
     response = pipe(
         messages,
@@ -56,4 +58,8 @@ def analyze_hts(pipe, query, notes, tables):
     )
     end = time.perf_counter() - start
     result = response[0]["generated_text"].strip()
-    return result, end
+    messages.append({
+        "role": "assistant",
+        "content": result,
+    })
+    return result, messages, end

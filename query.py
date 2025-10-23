@@ -3,7 +3,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer, util
 from pathlib import Path
 import matplotlib.pyplot as plt
-from llama import load_llama, analyze_hts
+from llama import load_llama, analyze_hts, chat_llama
 
 def load_embeddings(prefix: str):
     emb_path = Path(f"embeddings/{prefix}_embeddings_latest.npy")
@@ -437,7 +437,7 @@ def main():
     generate_table_trend_graphs("trend_graphs.md", query_results, tables)
 
     # ---------- Run Llama reasoning for selected queries ----------
-    llama_queries = ["Silk fabrics", "Medicaments containing antibiotics"]
+    llama_queries = ["Silk fabrics"]
     llama_pipe = load_llama()
     llama_results = {}
 
@@ -464,15 +464,29 @@ def main():
 
         filtered_notes = res.get("notes_for_top_global_tables", [])
 
-        llama_text, llama_time = analyze_hts(
-            llama_pipe,
+        llama_text = analyze_hts(
             query=q,
             notes=filtered_notes,
             tables=global_tables,
         )
 
+        while True:
+            response, new_messages, llama_time = chat_llama(llama_pipe, llama_text)
+            llama_text = new_messages
+
+            print(response)
+
+            reply = input("Response (q to exit): ")
+            if reply.lower() == 'q':
+                break
+
+            llama_text.append({
+                "role": "user",
+                "content": reply,
+            })
+
         llama_results[q] = {
-            "explanation": llama_text,
+            "explanation": response,
             "time_taken": llama_time,
         }
 
