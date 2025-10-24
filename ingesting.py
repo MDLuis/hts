@@ -1,6 +1,7 @@
 from src.notes import GeneralNotesSource, SectionNotesSource, ChapterNotesSource, AdditionalUSNotesSource
 from src.tables import TariffTableSource
 from src.ingest import HTSSource
+from src.rules import GeneralRules
 import time
 from pathlib import Path
 from src.utils import combine
@@ -33,9 +34,10 @@ def main():
     ch_note = ChapterNotesSource()       # Chapter notes
     us_note = AdditionalUSNotesSource()  # Additional U.S. notes
     table = TariffTableSource()          # Tariff tables
+    rules = GeneralRules()               # Rules of interpretation
 
     # ----------------- Initialize storage containers -----------------
-    listGen, listSec, listCh, listUs, listTar = [], [], [], [], []  # Parsed data storage
+    listGen, listSec, listCh, listUs, listTar, listRules = [], [], [], [], [], []  # Parsed data storage
     benchmarks = []       # Total timing per dataset
     per_stage = []         # Per-stage timing (fetch, parse, save)
     per_item_timings = {} # Per-chapter timings
@@ -51,6 +53,10 @@ def main():
     hts_path = hts.fetch()
     hts_data = hts.parse(hts_path)
     hts.save(hts_data)
+
+    rules_path = rules.fetch()
+    rules_data = rules.parse(rules_path)
+    rules.save(rules_data)
 
     def benchmark_dataset(name, source, append_list, chapters, parse_ch=False):
         """
