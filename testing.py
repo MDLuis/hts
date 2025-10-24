@@ -2,6 +2,7 @@ from src.notes import GeneralNotesSource, SectionNotesSource, ChapterNotesSource
 from src.ingest import HTSSource
 from src.tables import TariffTableSource
 from src.rulings import Rulings
+from src.rules import GeneralRules
 def main():
     # # Testing the ingest of Sections and Chapters
     # source = HTSSource()
@@ -68,11 +69,17 @@ def main():
     #     results.append(tariff_table)
     # src.save(results)
 
-    # Testing rulings
-    rulings = Rulings()
-    hts, path = rulings.fetch("6214.10.1000")
-    parsed_rulings = rulings.parse(hts, path)
-    rulings.save(parsed_rulings, hts)
+    # # Testing rulings
+    # rulings = Rulings()
+    # hts, path = rulings.fetch("6214.10.1000")
+    # parsed_rulings = rulings.parse(hts, path)
+    # rulings.save(parsed_rulings, hts)
+
+    # Testing General Rules
+    rules = GeneralRules()
+    path = rules.fetch()
+    results = rules.parse(path)
+    rules.save(results)
 
 if __name__ == "__main__":
     main()
