@@ -111,3 +111,8 @@ class Ruling(BaseModel):
     hts_code: str
     prefix: str
     text: str
+
+class GeneralRule(BaseModel):
+    rule_number: Optional[str] = None
+    text: Optional[str] = None
+    sub_items:  Optional[List[Union[str, dict]]] = None
