@@ -1,7 +1,7 @@
 # HTS Hierarchical Embedding Query Report
 
 ## Query: Meat of bovine animals
-**Processing Time:** 2.515 seconds
+**Processing Time:** 2.535 seconds
 
 ### Closest Section
 - **Name:** Section I: LIVE ANIMALS; ANIMAL PRODUCTS
@@ -37,7 +37,7 @@
 ---
 
 ## Query: Wheat and meslin
-**Processing Time:** 3.867 seconds
+**Processing Time:** 3.850 seconds
 
 ### Closest Section
 - **Name:** Section IV: PREPARED FOODSTUFFS; BEVERAGES, SPIRITS AND VINEGAR;TOBACCO AND MANUFACTURED
@@ -73,7 +73,7 @@
 ---
 
 ## Query: Silk fabrics
-**Processing Time:** 2.637 seconds
+**Processing Time:** 2.583 seconds
 
 ### Closest Section
 - **Name:** Section XI: TEXTILES AND TEXTILE ARTICLES
@@ -104,7 +104,7 @@
 ---
 
 ## Query: Passenger motor vehicles
-**Processing Time:** 6.394 seconds
+**Processing Time:** 6.664 seconds
 
 ### Closest Section
 - **Name:** Section XVII: VEHICLES, AIRCRAFT, VESSELS AND ASSOCIATED
@@ -140,7 +140,7 @@
 ---
 
 ## Query: Medicaments containing antibiotics
-**Processing Time:** 4.859 seconds
+**Processing Time:** 4.945 seconds
 
 ### Closest Section
 - **Name:** Section IV: PREPARED FOODSTUFFS; BEVERAGES, SPIRITS AND VINEGAR;TOBACCO AND MANUFACTURED
@@ -176,7 +176,7 @@
 ---
 
 ## Query: Flat-rolled products of stainless steel
-**Processing Time:** 7.645 seconds
+**Processing Time:** 7.528 seconds
 
 ### Closest Section
 - **Name:** Section VI: PRODUCTS OF THE CHEMICAL OR ALLIED INDUSTRIES
@@ -212,7 +212,7 @@
 ---
 
 ## Query: Mobile phones
-**Processing Time:** 17.106 seconds
+**Processing Time:** 17.000 seconds
 
 ### Closest Section
 - **Name:** Section XVI: MACHINERY AND MECHANICAL APPLIANCES;
@@ -284,7 +284,7 @@
 ---
 
 ## Query: Jewelry of precious metals
-**Processing Time:** 3.977 seconds
+**Processing Time:** 4.177 seconds
 
 ### Closest Section
 - **Name:** Section XIV: NATURAL OR CULTURED PEARLS, PRECIOUS OR SEMIPRECIOUS STONES, PRECIOUS METALS, METALS
@@ -320,7 +320,7 @@
 ---
 
 ## Query: Coffee beans, roasted
-**Processing Time:** 3.698 seconds
+**Processing Time:** 3.596 seconds
 
 ### Closest Section
 - **Name:** Section II: VEGETABLE PRODUCTS

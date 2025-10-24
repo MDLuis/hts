@@ -6,6 +6,15 @@ import matplotlib.pyplot as plt
 from llama import load_llama, analyze_hts, chat_llama
 
 def load_embeddings(prefix: str):
+    """
+    Load precomputed embeddings and metadata given a prefix name.
+    Args:
+        prefix (str): Dataset prefix (e.g., 'section_titles', 'chapter_notes').
+    Returns:
+        tuple: (metadata, embeddings)
+            - metadata: List of dictionaries describing the text entries.
+            - embeddings: NumPy array of corresponding embeddings.
+    """
     emb_path = Path(f"embeddings/{prefix}_embeddings_latest.npy")
     meta_path = Path(f"embeddings/{prefix}_metadata_latest.json")
 
@@ -82,6 +91,7 @@ def hierarchical_search(
         table_labels = [t.get("htsno") for t in tables_in_chapter]
 
     def get_top_results(items):
+        """Helper: compute top_k results with cosine similarity."""
         if not items:
             return []
         texts = [i["text"] for i in items]
@@ -148,6 +158,9 @@ def hierarchical_search(
 
 
 def generate_report(report_path: str, query_results: dict):
+    """
+    Generate a Markdown report summarizing hierarchical search results for multiple queries, including similarity scores and top matches.
+    """
     with open(report_path, "w", encoding="utf-8") as f:
         f.write("# HTS Hierarchical Embedding Query Report\n\n")
         for query, result in query_results.items():
@@ -203,6 +216,7 @@ def extract_number(text, level="generic"):
     return text.strip()[:15]
 
 def plot_similarity_graph(labels, scores, title, output_path):
+    """Plot a basic bar chart for similarity scores."""
     plt.figure(figsize=(6, 5))
     plt.bar(labels, scores)
     plt.ylabel("Cosine Similarity")
@@ -214,7 +228,9 @@ def plot_similarity_graph(labels, scores, title, output_path):
     plt.close()
 
 def generate_graphs_for_query(query, result, tables):
-    """Create graphs using precomputed similarity scores."""
+    """
+    Generate similarity graphs (sections, chapters, tables, global tables) for a single query using precomputed cosine similarity scores.
+    """
     graphs_dir = Path("graphs")
     graphs_dir.mkdir(exist_ok=True)
     paths = {}
@@ -275,12 +291,16 @@ def write_graphs_markdown(md_path, title, graph_files):
             f.write("\n---\n\n")
 
 def generate_graphs(output_path, query_results, tables):
+    """
+    Generate and aggregate all similarity graphs for every query.
+    """
     graph_files = {}
     for query, result in query_results.items():
         graph_files[query] = generate_graphs_for_query(query, result, tables)
     write_graphs_markdown(output_path, "HTS Hierarchical Similarity Graphs", graph_files)
 
 def plot_trend_graph(scores, title, output_path):
+    """Plot a bar-style similarity trend graph for a chapter or set of tables."""
     colors = ["royalblue", "darkorange"]
     bar_colors = [colors[i % 2] for i in range(len(scores))]
     plt.figure(figsize=(8, 4))
@@ -294,6 +314,9 @@ def plot_trend_graph(scores, title, output_path):
     plt.close()
 
 def generate_table_trend_graphs_for_query(query, result, tables):
+    """
+    Create trend graphs showing similarity patterns for tables within one chapter and across all chapters.
+    """
     graphs_dir = Path("trend_graphs")
     graphs_dir.mkdir(exist_ok=True)
     paths = {}
@@ -315,12 +338,18 @@ def generate_table_trend_graphs_for_query(query, result, tables):
     return paths
 
 def generate_table_trend_graphs(output_path, query_results, tables):
+    """
+    Generate Markdown file containing all per-query trend graphs.
+    """
     trend_graph_files = {}
     for query, result in query_results.items():
         trend_graph_files[query] = generate_table_trend_graphs_for_query(query, result, tables)
     write_graphs_markdown(output_path,"HTS Table Similarity Trend Graphs",trend_graph_files)
 
 def plot_all_chapters_trend_graph(all_scores, all_labels, title, output_path):
+    """
+    Scatter-plot showing similarity distribution across all tariff tables grouped by chapter to visualize relative relevance density.
+    """
     plt.figure(figsize=(12, 4))
     chapters = [label.split("|")[-1].strip() for label in all_labels]
     unique_chapters = []
@@ -356,6 +385,9 @@ def plot_all_chapters_trend_graph(all_scores, all_labels, title, output_path):
     plt.close()
 
 def generate_all_chapters_trend_graph_for_query(query, result, tables):
+    """
+    Generate an all-chapter similarity scatter graph for a given query.
+    """
     graphs_dir = Path("trend_graphs")
     graphs_dir.mkdir(exist_ok=True)
     paths = {}
@@ -374,6 +406,9 @@ def generate_all_chapters_trend_graph_for_query(query, result, tables):
     return paths
 
 def generate_llama_report(output_path, llama_results):
+    """
+    Save Markdown summaries of LLaMA model responses for each query.
+    """
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("# Llama 3.2-3B Reasoning Results\n\n")
         for query, result in llama_results.items():

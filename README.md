@@ -1,16 +1,21 @@
-# Harmonized Tariff Schedule – Ingestion & Embedding Pipeline
+# Harmonized Tariff Schedule – Ingestion, Embedding & Reasoning Pipeline
 
-This repository implements an end-to-end pipeline to **download, parse, and store** the Harmonized Tariff Schedule (HTS) data — including general notes, section notes, chapter notes, additional U.S. notes, and tariff tables — and then **encode them into embeddings** for search, retrieval, and analysis.
+This repository implements an end-to-end pipeline to **download, parse, and store** the Harmonized Tariff Schedule (HTS) data — including general notes, section notes, chapter notes, additional U.S. notes, tariff tables, and rules of interpretation — and then **encode them into embeddings** for semantic search, retrieval, and analysis.
+It also includes **a reasoning module (Llama 3.2)** to generate structured clarifying questions about HTS-related queries using contextual embeddings and rules of interpretation.
 
 ---
 
 ## Features
 
-- **Automated PDF ingestion** of HTS sections, chapters, notes, and tariff tables.
-- **Clean, structured JSON** outputs for each data type with versioned filenames.
-- **Sentence-transformers embeddings** of all texts (notes and tariff tables).
-- **Benchmarks** files to track ingesting and encoding performance across datasets.
-- **Fully OOP architecture**: each data source is represented by its own class.
+- **Automated PDF and JSON ingestion** of HTS sections, chapters, notes, and tariff tables.  
+- **Clean, structured JSON outputs** for each data type with versioned and `_latest` copies.  
+- **Sentence-transformers embeddings** for all notes, tables, and titles.  
+- **Hierarchical semantic search**: query → section → chapter → notes → tariff rows.  
+- **Integrated Llama reasoning**: contextual reflection and clarification using retrieved content.  
+- **CBP Rulings downloader and parser** for cross-referencing legal rulings.  
+- **Rules of Interpretation ingestion** (General and Additional U.S.).  
+- **Benchmarking & size analytics** for ingestion, encoding, and storage footprint.  
+- **Fully OOP architecture**: every data source inherits from a `Source` base class.
 
 ---
 
@@ -19,53 +24,68 @@ This repository implements an end-to-end pipeline to **download, parse, and stor
 ```
 .
 ├── ingesting.py                – Main script to fetch and parse HTS data
-├── encoding.py                 – Script to generate embeddings from JSON files
-├── requirements.txt            - To install libraries needed
+├── encoding.py                 – Generates embeddings for all notes, titles, and tables
+├── query.py                    – Performs hierarchical semantic search & similarity graphs
+├── llama.py                    – Llama 3.2 reasoning on top of retrieved HTS context
+├── size.py                     – Generates markdown report on file sizes and projections
+├── requirements.txt            – Python dependencies
 ├── benchmarkIngest.md          – Timing results for ingesting
 ├── benchmarks.md               – Timing results for encoding
+│
 ├── data/
 │   ├── notes/
 │   │   ├── general/ (general_notes_latest.json)
 │   │   ├── section/ (section_notes_latest.json)
 │   │   ├── chapter/ (chapter_notes_latest.json)
 │   │   └── additional/ (additional_us_notes_latest.json)
-│   └── tables/ (tariff_tables_all_latest.json)
-├── embeddings/                 – Generated embeddings (.npy) + text files (.json)
+│   ├── tables/ (tariff_tables_all_latest.json)
+│   ├── rules/ (general_rules_latest.json)
+│   └── hts/ (hts_full_latest.json)
+│
+├── embeddings/                 – Generated embeddings (.npy) and metadata (.json)
+├── CBPrulings/                 – CBP ruling PDFs, DOCs, and parsed JSONs
+├── graphs/                     – Similarity and trend graph images
+│
 └── src/
-    ├── base.py     - Abstract class for data sources
-    ├── ingest.py   - HTSSource
-    ├── models.py   - Data models
-    ├── notes.py    – GeneralNotesSource, SectionNotesSource, etc.
-    ├── tables.py   – TariffTableSource    
-    └── utils.py    - Helper functions for deduplication and retry
+    ├── base.py                 – Abstract class for data sources
+    ├── ingest.py               – HTSSource (Table of Contents parser)
+    ├── notes.py                – GeneralNotesSource, SectionNotesSource, etc.
+    ├── tables.py               – TariffTableSource
+    ├── rules.py                – GeneralRules (General & Additional U.S. Rules)
+    ├── rulings.py              – CBP Rulings scraper and parser
+    ├── models.py               – Pydantic models for structured HTS data
+    └── utils.py                – Helper functions for retries, deduplication, and combination
 ```
 
 ---
 
 ## Class Hierarchy
 
-All scraper classes inherit from a `Source` base (in `src`):
+All scraper classes inherit from a `Source` base (in `src/base.py`):
 
-- **GeneralNotesSource** – fetch, parse, and save General Notes.
-- **SectionNotesSource** – fetch, parse, and save Section Notes.
-- **ChapterNotesSource** – fetch, parse, and save Chapter Notes.
-- **AdditionalUSNotesSource** – fetch, parse, and save Additional U.S. Notes.
-- **TariffTableSource** – fetch, parse, and save tariff tables.
+- **HTSSource** – downloads and parses the HTS Table of Contents.  
+- **GeneralNotesSource** – fetches and parses General Notes.  
+- **SectionNotesSource** – fetches and parses Section Notes.  
+- **ChapterNotesSource** – fetches and parses Chapter Notes.  
+- **AdditionalUSNotesSource** – fetches and parses Additional U.S. Notes.  
+- **TariffTableSource** – fetches and parses Tariff Tables (JSON endpoints).  
+- **GeneralRules** – fetches and parses the General and Additional Rules of Interpretation.  
+- **Rulings** – fetches CBP ruling PDFs/DOCs for given HTS codes.  
 
 Each implements:
 - `fetch(...)` – download the corresponding PDF or JSON file.
-- `parse(pdf_path)` – extract structured text from the PDF or JSON file.
-- `save(data, filepath, version)` – store JSON with version and latest copies.
+- `parse(...)` – extract structured text from the PDF or JSON file.
+- `save(...)` – store JSON with version and latest copies.
 
 ---
 
 ## Utilities
 
-The repo also includes helper functions in `utils.py`:
+The repo includes helper utilities (`src/utils.py`):
 
-- `get_retry(url, ...)` – download with automatic retries and exponential backoff.
-
-- `deduplicate(data_list, key_attr)` – remove duplicate objects by attribute.
+- `get_retry(url, retries=5, backoff_factor=0.5)` – HTTP GET with automatic retries.  
+- `deduplicate(data_list, key_attr)` – remove duplicates by attribute.  
+- `combine()` – merges all parsed data (sections, notes, tables) into a unified `hts_full_latest.json`.
 
 ---
 
@@ -83,9 +103,7 @@ pip install -r requirements.txt
 
 ## How to Run
 
-### 1. Ingest PDFs into JSON
-
-Edit the chapter range in `ingesting.py` as needed (default `range(1,10)`), then:
+### 1. Ingest PDFs and JSONs into Structured Data
 
 ```bash
 python ingesting.py
@@ -118,22 +136,53 @@ This ensures reproducibility and a permanent record of past runs.
 
 ---
 
+
+### 3. Perform Hierarchical Query & Similarity Analysis
+
+```bash
+python query.py
+```
+
+This will:
+- Run multi-stage semantic retrieval (section → chapter → notes → tariff tables)  
+- Generate reports (`query_report.md`)  
+- Create similarity and trend graphs (`graphs.md`, `trend_graphs.md`)  
+
+---
+
+### 4. Llama 3.2 Reasoning
+
+```bash
+(Llama reasoning is invoked automatically when running query.py for selected queries.)
+```
+
+Performs contextual reasoning using **Llama 3.2-3B-Instruct**:
+- Loads the retrieved notes and table rows  
+- Reflects on missing product information  
+- Generates **clarifying questions** based on HTS General Rules  
+
+---
+
+### 5. Storage Size Report
+
+```bash
+python size.py
+```
+
+Generates `size_report.md` showing:
+- Total and average file sizes across stages  
+- Expansion ratios between raw PDFs → structured JSONs  
+- Projected full-HTS storage footprint  
+
+---
+
 ## Benchmarks
 
-### Encoding 
-See `benchmarks.md` for encoding performance by dataset, including:
-- Number of texts encoded
-- Model used
-- Time taken on your hardware
-
-### Ingestion
-See `benchmarkIngest.md` for ingestion performance by dataset, including:
-- Number of items processed
-- Total processing time
-- Items per second
-- Seconds per item
-- Per-stage timing (fetch, parse, save)
-- Per-chapter timing
+- **Encoding**: `benchmarks.md` (texts encoded, model used, time taken)
+- **Ingestion**: `benchmarkIngest.md` (dataset timings and throughput)
+- **Reasoning**: `llama.md` (prompt and response timing)
+- **Size Analysis**: `size_report.md` (space metrics and projections)
+- **Query Report**: `query_report.md` (semantic retrieval and similarity scores)
 
 ---
 
@@ -147,11 +196,17 @@ See `benchmarkIngest.md` for ingestion performance by dataset, including:
 
 ## Extending the Pipeline
 
-- Increase the chapter ranges in `ingesting.py` to fetch more data.
-- Add additional `Source` subclasses in `src` for new document types.
-- Swap out the embedding model in `encoding.py` by changing:
+- Add new subclasses of `Source` for additional data types.  
+- Change embedding model in `encoding.py` by updating:
 
 ```python
 model = SentenceTransformer("all-MiniLM-L6-v2")
 ```
 
+- Integrate new reasoning models in `llama.py` by replacing:
+
+```python
+model_id = "meta-llama/Llama-3.2-3B-Instruct"
+```
+
+---
