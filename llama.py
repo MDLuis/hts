@@ -51,22 +51,17 @@ def load_general_rules(path="data/rules/general_rules_latest.json") -> str:
 
     return "\n".join(lines)
 
-def analyze_hts(query, notes, tables):
+def analyze_hts(query, tables):
     """
     Construct the message context for a conversational LLama model to analyze missing information in an HTS classification query.
     The model is guided by the General Rules of Interpretation and Additional U.S. Rules.
     Args:
         query (str): The user query (e.g., description of a product).
-        notes (list[dict]): Top-relevant note entries with scores and text.
         tables (list[dict]): Top-relevant tariff table entries.
     Returns:
         list[dict]: A message sequence suitable for Llama chat completion.
     """
     general_rules = load_general_rules()
-    # Summarize top-relevant notes
-    notes_text = "\n".join([
-        f"- [Chapter: {n.get('chapter_title', 'N/A')}] Score {n['score']:.3f}: {n['text'][:200]}" for n in notes
-     ]) or "No notes available."
 
     # Summarize top-relevant tariff table rows
     tables_text = "\n".join([
@@ -101,10 +96,32 @@ def analyze_hts(query, notes, tables):
         },
         {
             "role": "user",
-            "content": f"Query: '{query}'\n\nTop Relevant Notes:\n{notes_text}\n\nTop Relevant Tariff Table Rows:\n{tables_text}\n\nBased on this, reflect on what information is missing."
+            "content": (
+                f"Query: '{query}'\n\n"
+                f"Here are the top relevant tariff table rows:\n{tables_text}\n\n"
+                "Based only on these, ask clear, specific questions."
+            ),
         },
     ]
     return messages
+
+def analyze_notes(notes, messages):
+    # notes (list[dict]): Top-relevant note entries with scores and text.
+    # Summarize top-relevant notes
+    notes_text = "\n".join([
+        f"- [Chapter: {n.get('chapter_title', 'N/A')}] Score {n['score']:.3f}: {n['text'][:200]}" for n in notes
+     ]) or "No notes available."
+
+    messages.append({
+        "role": "user",
+        "content": (
+            f"Here are the most relevant chapter notes for the same chapters:\n{notes_text}\n\n"
+            "Please refine or add to your previous questions using the legal nuances from these notes. "
+            "Ensure the final set of questions would cover all potential ambiguities a customs analyst should clarify."
+        ),
+    })
+
+    return messages 
 
 def chat_llama(pipe, messages):
     """

@@ -1,164 +1,167 @@
 # Llama 3.2-3B Reasoning Results
 
 ## Query: Silk fabrics
-**Processing Time:** Total time was about 7 hrs, around 60-90 min per batch of questions (4 Batches + Initial Query)
+### Step 1 – Based on Tariff Tables
+**Processing Time:** 3146.73 seconds
 
-Based on the information provided, I believe I have enough information to make a confident classification.
+Based on the provided information, here are some key details about the product that are missing:
 
-The silk fabric is:
+1. Where it is from (source or origin):
+   - Is the silk fabric from China, India, Italy, or another country?
+   - Is it a specific type of silk fabric, such as habotai or charmeuse?
 
-* From China (source or origin)
-* Woven
-* Dupioni silk fabric
-* Used for jackets
-* Designed for men
-* For casual wear
+2. How it is made (composition or process):
+   - Is the silk fabric woven or knitted?
+   - Is it made from mulberry silk, wild silk, or another type of silk?
 
-Considering these characteristics, I would classify the silk fabric as a type of clothing accessory, specifically a jacket, that falls under Chapter 62 of the Harmonized Tariff Schedule (HTS).
+3. What it is used for (purpose or application):
+   - Is the silk fabric used for clothing, upholstery, or another product?
+   - Is it used for a specific type of garment, such as a dress or suit?
 
-However, I would like to clarify that Chapter 62 specifically covers articles of apparel and clothing accessories, not knitted or crocheted articles. Since the silk fabric is woven, it falls under Chapter 62.
+To clarify these points, I have the following questions:
 
-I would also like to note that the HTS code for dupioni silk fabric is not explicitly mentioned in the provided information. However, based on the characteristics of the silk fabric, I would expect the HTS code to be in the range of 6202 or 6203, which covers woven silk fabrics.
+- Is the silk fabric referred to as "noil silk" in the HTSNO 5007.10 description?
+- Is the fabric woven or knitted?
+- Is the silk fabric made from a specific type of silk, such as mulberry or wild silk?
+- Is the silk fabric used for a specific type of garment or product, such as clothing, upholstery, or bedding?
 
-To confirm the classification, I would need to verify the HTS code and any applicable rules or regulations.
+### Step 2 – Refined with Chapter Notes
+**Processing Time:** 1859.67 seconds
 
-Please let me know if you would like me to proceed with verifying the HTS code or if you have any further questions or clarifications.
+(I made a mistake and didnt ask for answers to these questions, but were answered on the first batch of questions after this)
+
+Based on the provided chapter notes, here are some refined and additional questions to clarify the details about the product:
+
+1. Where it is from (source or origin):
+   - Is the silk fabric referred to as "noil silk" in the HTSNO 5007.10 description?
+   - Is the silk fabric made from a specific type of silk, such as mulberry or wild silk?
+   - Is the silk fabric used for a specific type of garment or product, such as clothing, upholstery, or bedding?
+
+2. How it is made (composition or process):
+   - Is the silk fabric woven or knitted?
+   - Is the silk fabric made from a specific type of silk, such as mulberry or wild silk?
+   - Is the silk fabric used for a specific type of garment or product, such as clothing, upholstery, or bedding?
+
+3. What it is used for (purpose or application):
+   - Is the silk fabric used for clothing, upholstery, or another product?
+   - Is the silk fabric used for a specific type of garment, such as a dress or suit?
+   - Is the silk fabric part of a "suit" as defined in the chapter notes (a set of garments composed of two or three pieces made up in
+
+
 
 ---
 
-# The entire chat 
+**Processing Time:** around 2574.30 seconds per batch after notes (3 batches)
+
+Based on the additional information, here are some follow-up questions to clarify the details:
+
+1. Is the dupioni silk fabric used for jackets that are designed for everyday wear or for specific occasions?
+2. Is the dupioni silk fabric used for jackets that are suitable for both men's and women's clothing?
+3. Is the dupioni silk fabric used for jackets that are designed for a specific type of climate or temperature range?
+4. Is the dupioni silk fabric used for jackets that are made with a specific type of closure, such as a zipper or button?
+5. Is the dupioni silk fabric used for jackets that are designed to be formal or informal?
+
+Considering the HTSNO 5007.10 description, I have the following questions:
+
+- Is the dupioni silk fabric entered with a specific type of jacket or garment?
+- Is the dupioni silk fabric used for jackets that are designed to be worn with specific types of clothing, such as a shirt or pants?
+
+Also, considering the chapter notes, I have the following questions:
+
+- Is the dupioni silk fabric used for jackets that are designed to be worn with a specific type of closure, such as a zipper or button?
+- Is the dupioni silk fabric used for jackets that are designed to be
+
+---
+
+
+## Entire chat/run
 
 [LLAMA] Evaluating: Silk fabrics
 
-Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation. (Tables)
 
-To determine the HTS code for 'Silk fabrics', we need to clarify the following:
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation. (Notes)
+ 
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation. (First batch)
+identical fabric)?
+   - Is the silk fabric part of a "ski ensemble" as defined in the chapter notes (a set of garments composed of two or three pieces, put up for retail sale and comprising a specific type of garment)?
+   - Is the silk fabric designed for left over right closure at the front or right over left closure at the front?
 
-1. Where it is from (source or origin):
-   - Is the silk fabric of noil silk (HTSNO 5007.10) from a specific country, or is it a general term for silk fabrics from any country?
+To clarify these points, I have the following questions:
 
-2. How it is made (composition or process):
-   - Is the silk fabric woven, knitted, or crocheted?
-   - Is it a made-up article of any textile fabric, excluding knitted or crocheted articles (other than those of heading 6212)?
-
-3. What it is used for (purpose or application):
-   - Is the silk fabric used for clothing or accessories (Chapter 62), or is it used for other purposes (Chapter 61)?
-
-To proceed, I would like to ask the following clarifying questions:
-
-- Is the silk fabric of noil silk (HTSNO 5007.10) from a specific country, or is it a general term for silk fabrics from any country?
-- Is the silk fabric woven, knitted, or crocheted?
-- Is the silk fabric used for clothing or accessories, or is it used for other purposes?
+- Is the silk fabric referred to as "noil silk" in the HTSNO 5007.10 description?
+- Is the silk fabric made from a specific type of silk, such as mulberry or wild silk?
+- Is the silk fabric used for a specific type of garment or product, such as clothing, upholstery, or bedding?
+- Is the silk fabric part of a "suit" as defined in the chapter notes?
+- Is the silk fabric part of a "ski ensemble" as defined in the chapter notes?
+- Is the silk fabric designed for left over right closure at the front or right over left closure at the front?
+- Is the silk fabric used for a specific type of garment, such as a dress or suit?
+- Is the silk fabric woven or knitted?
 
 Response (q to exit): `The silk comes from china, the silk fabric is woven, and its used for clothing`
 
----
 Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
 
-Based on the information provided, here's my reflection on what information is still missing:
+Based on the additional information, here are some follow-up questions to clarify the details:
 
-1. Where it is from (source or origin):
-   - The silk fabric is from China, which is a specific country.
+1. Is the silk fabric referred to as "noil silk" in the HTSNO 5007.10 description?
+2. Is the silk fabric made from a specific type of silk, such as mulberry or wild silk?
+3. Is the silk fabric used for a specific type of clothing, such as dresses, suits, or other garments?
+4. Is the silk fabric woven in a specific type of weave, such as twill or plain weave?
+5. Is the silk fabric used for a specific type of clothing that is designed for left over right closure at the front or right over left closure at the front?
+6. Is the silk fabric used for a specific type of garment that is part of a "suit" or "ski ensemble" as defined in the chapter notes?
 
-2. How it is made (composition or process):
-   - The silk fabric is woven.
+To further clarify, I have the following questions:
 
-3. What it is used for (purpose or application):
-   - The silk fabric is used for clothing.
-
-However, I would like to clarify the following points to determine the HTS code:
-
-- Is the silk fabric made up (e.g., as a suit, ensemble, or other garment) or is it a plain fabric?
-- Is the clothing designed for a specific type of person (e.g., men, women, boys, girls), or is it a general term for clothing?
-- Is the clothing designed for a specific occasion or activity (e.g., formal, casual, workwear)?
-
-To proceed, I would like to ask the following clarifying questions:
-
-- Is the silk fabric made up as a garment (e.g., suit, ensemble, dress)?
-- Is the clothing designed for a specific type of person (e.g., men, women, boys, girls)?
-- Is the clothing designed for a specific occasion or activity (e.g., formal
+- Is the silk fabric entered with a specific type of clothing, such as a dress or suit?
+- Is the silk fabric used for a specific type of garment that is designed for a specific type of closure, such as a zipper or button?
+- Is the silk fabric woven in a specific type of country or region?
+- Is the silk fabric
 
 Response (q to exit): `It is a plain fabric, is it specific for men, it has no specific occasion`
 
----
 Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+Based on the additional information, here are some follow-up questions to clarify the details:
 
-Based on the information provided, here's my reflection on what information is still missing:
+1. Is the silk fabric woven in a plain weave?
+2. Is the silk fabric made from a specific type of silk, such as mulberry or wild silk?
+3. Is the silk fabric used for a specific type of clothing, such as dresses, suits, or other garments?
+4. Is the silk fabric suitable for both men's and women's clothing?
+5. Is the silk fabric used for everyday clothing or for special occasions?
+6. Is the silk fabric suitable for a wide range of temperatures or climates?
 
-1. Where it is from (source or origin):
-   - The silk fabric is from China, which is a specific country.
+To further clarify, I have the following questions:
 
-2. How it is made (composition or process):
-   - The silk fabric is woven.
+- Is the silk fabric used for a specific type of garment, such as a dress or suit?
+- Is the silk fabric suitable for both men's and women's clothing?
+- Is the silk fabric used for everyday clothing or for special occasions?
+- Is the silk fabric suitable for a wide range of temperatures or climates?
+- Is the silk fabric used for a specific type of clothing that is designed for comfort or style?
 
-3. What it is used for (purpose or application):
-   - The silk fabric is used for clothing, specifically a plain fabric.
+Also, considering the HTSNO 5007.10 description, I have the following questions:
 
-The fact that it's a plain fabric and not made up as a garment, and it's not specific for men or a specific occasion, helps to narrow down the classification.
-
-However, I would like to clarify the following points to determine the HTS code:
-
-- Is the fabric a specific type of silk fabric (e.g., charmeuse, dupioni, habotai)?
-- Is the fabric woven for a specific purpose (e.g., dress fabric, upholstery fabric, etc.)?
-- Is the fabric suitable for a specific type of garment (e.g., dress, blouse, pants, etc.)?
-
-To proceed, I would like to ask the following clarifying questions:
-
-- Is the fabric a specific type of silk fabric (e.g., charmeuse, dupioni, habotai)?
-- Is the fabric suitable
+- Is the silk fabric entered with a specific type of garment or accessory, such as a scarf or
 
 Response (q to exit): `the silk is dupioni, and its for jackets`
 
----
 Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
 
-Based on the information provided, here's my reflection on what information is still missing:
+Based on the additional information, here are some follow-up questions to clarify the details:
 
-1. Where it is from (source or origin):
-   - The silk fabric is from China, which is a specific country.
+1. Is the dupioni silk fabric used for jackets that are designed for everyday wear or for specific occasions?
+2. Is the dupioni silk fabric used for jackets that are suitable for both men's and women's clothing?
+3. Is the dupioni silk fabric used for jackets that are designed for a specific type of climate or temperature range?
+4. Is the dupioni silk fabric used for jackets that are made with a specific type of closure, such as a zipper or button?
+5. Is the dupioni silk fabric used for jackets that are designed to be formal or informal?
 
-2. How it is made (composition or process):
-   - The silk fabric is woven.
+Considering the HTSNO 5007.10 description, I have the following questions:
 
-3. What it is used for (purpose or application):
-   - The silk fabric is used for jackets.
+- Is the dupioni silk fabric entered with a specific type of jacket or garment?
+- Is the dupioni silk fabric used for jackets that are designed to be worn with specific types of clothing, such as a shirt or pants?
 
-The fact that it's a dupioni silk fabric, specifically used for jackets, provides more context for the classification.
+Also, considering the chapter notes, I have the following questions:
 
-However, I would like to clarify the following points to determine the HTS code:
-
-- Is the jacket a specific type of jacket (e.g., men's, women's, children's, workwear)?
-- Is the jacket designed for a specific purpose or activity (e.g., formal, casual, outdoor)?
-- Is the jacket a complete garment, or is it a part of a set (e.g., jacket and pants)?
-
-To proceed, I would like to ask the following clarifying questions:
-
-- Is the jacket a specific type of jacket (e.g., men's, women's, children's, workwear)?
-- Is the jacket a complete garment, or is it a part of a set (e.g., jacket and pants
-
-Response (q to exit): `Its designed for men, for casual wear`
-
----
-Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
-Based on the information provided, I believe I have enough information to make a confident classification.
-
-The silk fabric is:
-
-* From China (source or origin)
-* Woven
-* Dupioni silk fabric
-* Used for jackets
-* Designed for men
-* For casual wear
-
-Considering these characteristics, I would classify the silk fabric as a type of clothing accessory, specifically a jacket, that falls under Chapter 62 of the Harmonized Tariff Schedule (HTS).
-
-However, I would like to clarify that Chapter 62 specifically covers articles of apparel and clothing accessories, not knitted or crocheted articles. Since the silk fabric is woven, it falls under Chapter 62.
-
-I would also like to note that the HTS code for dupioni silk fabric is not explicitly mentioned in the provided information. However, based on the characteristics of the silk fabric, I would expect the HTS code to be in the range of 6202 or 6203, which covers woven silk fabrics.
-
-To confirm the classification, I would need to verify the HTS code and any applicable rules or regulations.
-
-Please let me know if you would like me to proceed with verifying the HTS code or if you have any further questions or clarifications.
+- Is the dupioni silk fabric used for jackets that are designed to be worn with a specific type of closure, such as a zipper or button?
+- Is the dupioni silk fabric used for jackets that are designed to be
 
 Response (q to exit): q

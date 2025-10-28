@@ -3,7 +3,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer, util
 from pathlib import Path
 import matplotlib.pyplot as plt
-from llama import load_llama, analyze_hts, chat_llama
+from llama import load_llama, analyze_hts, chat_llama, analyze_notes
 
 def load_embeddings(prefix: str):
     """
@@ -413,6 +413,13 @@ def generate_llama_report(output_path, llama_results):
         f.write("# Llama 3.2-3B Reasoning Results\n\n")
         for query, result in llama_results.items():
             f.write(f"## Query: {query}\n")
+            f.write("### Step 1 – Based on Tariff Tables\n")
+            f.write(f"**Processing Time:** {result['time_t']:.2f} seconds\n\n")            
+            f.write(result["tables"].strip() + "\n\n")
+            f.write("### Step 2 – Refined with Chapter Notes\n")
+            f.write(f"**Processing Time:** {result['time_n']:.2f} seconds\n\n")
+            f.write(result["notes"].strip() + "\n\n")
+            f.write("\n\n---\n\n")
             f.write(f"**Processing Time:** {result['time_taken']:.2f} seconds\n\n")
             f.write(result["explanation"].strip())
             f.write("\n\n---\n\n")
@@ -499,11 +506,14 @@ def main():
 
         filtered_notes = res.get("notes_for_top_global_tables", [])
 
-        llama_text = analyze_hts(
+        llama_tables = analyze_hts(
             query=q,
-            notes=filtered_notes,
             tables=global_tables,
         )
+        response_t, messages_t, time_t = chat_llama(llama_pipe, llama_tables)
+
+        llama_notes = analyze_notes(filtered_notes,messages_t)
+        response_n, llama_text, time_n = chat_llama(llama_pipe, llama_notes)
 
         while True:
             response, new_messages, llama_time = chat_llama(llama_pipe, llama_text)
@@ -521,8 +531,12 @@ def main():
             })
 
         llama_results[q] = {
+            "tables": response_t,
+            "notes": response_n,
             "explanation": response,
             "time_taken": llama_time,
+            "time_t": time_t,
+            "time_n": time_n,
         }
 
     generate_llama_report("llama.md", llama_results)
