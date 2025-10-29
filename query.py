@@ -515,9 +515,18 @@ def main():
         llama_notes = analyze_notes(filtered_notes,messages_t)
         response_n, llama_text, time_n = chat_llama(llama_pipe, llama_notes)
 
+        print(response_n)
+        reply = input("Response: ")
+        llama_text.append({
+            "role": "user",
+            "content": reply,
+        })
+
+        total_time = 0
         while True:
             response, new_messages, llama_time = chat_llama(llama_pipe, llama_text)
             llama_text = new_messages
+            total_time += llama_time
 
             print(response)
 
@@ -534,7 +543,7 @@ def main():
             "tables": response_t,
             "notes": response_n,
             "explanation": response,
-            "time_taken": llama_time,
+            "time_taken": total_time,
             "time_t": time_t,
             "time_n": time_n,
         }

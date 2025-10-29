@@ -11,7 +11,7 @@ def load_llama():
     pipe = pipeline(
         "text-generation",
         model=model_id,
-        torch_dtype=torch.bfloat16,
+        dtype=torch.bfloat16,
         device_map="auto",
         return_full_text=False,
     )
