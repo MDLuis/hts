@@ -28,10 +28,6 @@ def load_embeddings(prefix: str):
 def hierarchical_search(
     query,
     model,
-    section_titles,
-    section_emb,
-    chapter_titles,
-    chapter_emb,
     notes,
     tables,
     top_k=3,
@@ -47,61 +43,6 @@ def hierarchical_search(
     """
     # Encode query once
     q_emb = model.encode(query, convert_to_tensor=True)
-
-    # ---------- Step 1: Best Section ----------
-    section_scores = util.cos_sim(q_emb, section_emb)[0]
-    best_section_idx = int(np.argmax(section_scores))
-    best_section = section_titles[best_section_idx]
-    best_section_score = float(section_scores[best_section_idx])
-
-    # ---------- Step 2: Best Chapter within section ----------
-    chapters_in_section = [(i, ch) for i, ch in enumerate(chapter_titles) if ch.startswith(best_section)]
-    if not chapters_in_section:
-        return {
-            "section": best_section,
-            "section_score": best_section_score,
-            "chapter": None,
-            "chapter_score": 0.0,
-            "top_notes": [],
-            "top_tables": [],
-            "global_top_table": None,
-            "notes_for_top_global_tables": [],
-            "section_scores": section_scores.cpu().numpy(),
-            "section_labels": section_titles,
-        }
-
-    filtered_ch_idxs = [i for i, _ in chapters_in_section]
-    filtered_ch_emb = chapter_emb[filtered_ch_idxs]
-    chapter_scores = util.cos_sim(q_emb, filtered_ch_emb)[0]
-
-    best_chapter_idx = filtered_ch_idxs[int(np.argmax(chapter_scores))]
-    best_chapter = chapter_titles[best_chapter_idx]
-    best_chapter_score = float(chapter_scores[np.argmax(chapter_scores)])
-    chapter_name_only = best_chapter.split("|")[-1].strip()
-
-    # ---------- Step 3: Top Notes and Tariff Tables within Chapter ----------
-    notes_in_chapter = [n for n in notes if n["chapter_title"] == chapter_name_only]
-    tables_in_chapter = [t for t in tables if t["chapter_title"] == chapter_name_only]
-    table_scores = None
-    table_labels = None
-    if tables_in_chapter:
-        table_texts = [t["text"] for t in tables_in_chapter]
-        table_embs = model.encode(table_texts, convert_to_tensor=True)
-        table_scores = util.cos_sim(q_emb, table_embs)[0].cpu().numpy()
-        table_labels = [t.get("htsno") for t in tables_in_chapter]
-
-    def get_top_results(items):
-        """Helper: compute top_k results with cosine similarity."""
-        if not items:
-            return []
-        texts = [i["text"] for i in items]
-        embs = model.encode(texts, convert_to_tensor=True)
-        scores = util.cos_sim(q_emb, embs)[0]
-        top_idxs = np.argsort(-scores)[:top_k]
-        return [{"text": texts[i], "score": float(scores[i]), "htsno": items[i].get("htsno")} for i in top_idxs]
-
-    top_notes = get_top_results(notes_in_chapter)
-    top_tables = get_top_results(tables_in_chapter)
 
     # ---------- Step 4: Global Top Tariff Table Row ----------
     global_top_table = None
@@ -139,23 +80,10 @@ def hierarchical_search(
             ]
 
     return {
-        "section": best_section,
-        "section_score": best_section_score,
-        "chapter": chapter_name_only,
-        "chapter_score": best_chapter_score,
-        "top_notes": top_notes,
-        "top_tables": top_tables,
         "global_top_table": global_top_table,
         "notes_for_top_global_tables": notes_for_top_global_tables,
-        "section_scores": section_scores.cpu().numpy(),
-        "section_labels": section_titles,
-        "chapter_scores": chapter_scores.cpu().numpy(),
-        "chapter_labels": [ch for _, ch in chapters_in_section],
-        "chapter_table_scores": table_scores,
-        "chapter_table_labels": table_labels,
         "global_table_scores": all_table_scores,
     }
-
 
 def generate_report(report_path: str, query_results: dict):
     """
@@ -166,26 +94,6 @@ def generate_report(report_path: str, query_results: dict):
         for query, result in query_results.items():
             f.write(f"## Query: {query}\n")
             f.write(f"**Processing Time:** {result['time_taken']:.3f} seconds\n\n")
-
-            f.write(f"### Closest Section\n")
-            f.write(f"- **Name:** {result['section']}\n")
-            f.write(f"- **Score:** {result['section_score']:.4f}\n\n")
-
-            f.write(f"### Closest Chapter Within Section\n")
-            f.write(f"- **Name:** {result['chapter']}\n")
-            f.write(f"- **Score:** {result['chapter_score']:.4f}\n\n")
-
-            f.write(f"### Top Notes From Current Chapter\n")
-            for note in result["top_notes"]:
-                f.write(f"- **Score: {note['score']:.3f}** \n\t - {note['text'][:200]}...\n")
-            if not result["top_notes"]:
-                f.write("- No notes found.\n")
-
-            f.write(f"\n### Top Tariff Table Rows From Current Chapter\n")
-            for row in result["top_tables"]:
-                f.write(f"- **Score: {row['score']:.3f}** \n\t - HTS Code: {row.get('htsno')}, {row['text'][:200]}...\n")
-            if not result["top_tables"]:
-                f.write("- No table rows found.\n")
 
             if result.get("global_top_table"):
                 g = result["global_top_table"]
@@ -201,15 +109,7 @@ def generate_report(report_path: str, query_results: dict):
             f.write("\n---\n\n")
 
 def extract_number(text, level="generic"):
-    if level == "section":
-        m = re.search(r"Section\s+([IVXLCDM]+)", text)
-        if m:
-            return f"Section {m.group(1)}"
-    elif level == "chapter":
-        m = re.search(r"(\d{1,3})(?::|\s|$)", text.split("|")[-1].strip())
-        if m:
-            return f"Chapter {m.group(1)}"
-    elif level == "table":
+    if level == "table":
         m = re.search(r"(\d{2,8}(?:\.\d+)*)", text)
         if m:
             return f"HTSNO {m.group(1)}"
@@ -234,40 +134,6 @@ def generate_graphs_for_query(query, result, tables):
     graphs_dir = Path("graphs")
     graphs_dir.mkdir(exist_ok=True)
     paths = {}
-
-    # ---- Sections ----
-    section_scores = result["section_scores"]
-    section_labels = [extract_number(s, "section") for s in result["section_labels"]]
-    top_idx = np.argsort(-section_scores)[:5]
-    path = graphs_dir / f"{query.replace(' ', '_')}_sections.png"
-    plot_similarity_graph([section_labels[i] for i in top_idx], section_scores[top_idx], f"Top 5 Sections – {query}", path)
-    paths["sections"] = path
-
-    # ---- Chapters ----
-    if "chapter_scores" in result:
-        chapter_scores = result["chapter_scores"]
-        chapter_labels = [extract_number(ch, "chapter") for ch in result["chapter_labels"]]
-        top_idx = np.argsort(-chapter_scores)[:5]
-        path = graphs_dir / f"{query.replace(' ', '_')}_chapters.png"
-        plot_similarity_graph([chapter_labels[i] for i in top_idx], chapter_scores[top_idx], f"Top 5 Chapters in {extract_number(result['section'], 'section')}", path)
-        paths["chapters"] = path
-
-    # ---- Tables within Chapter ----
-    if "chapter_table_scores" in result and result["chapter_table_scores"] is not None:
-        tbl_scores = result["chapter_table_scores"]
-        tbl_labels = [
-            extract_number(htsno or f"Row{i}", "table")
-            for i, htsno in enumerate(result["chapter_table_labels"])
-        ]
-        top_idx = np.argsort(-tbl_scores)[:5]
-        path = graphs_dir / f"{query.replace(' ', '_')}_tables.png"
-        plot_similarity_graph(
-            [tbl_labels[i] for i in top_idx],
-            tbl_scores[top_idx],
-            f"Top 5 Tables Rows in {extract_number(result['chapter'], 'chapter')}",
-            path
-        )
-        paths["tables"] = path
 
     # ---- Global Tables ----
     if "global_table_scores" in result and result["global_table_scores"] is not None:
@@ -430,16 +296,12 @@ def main():
     model = SentenceTransformer(model_name)
 
     # Load embeddings
-    section_titles, section_emb = load_embeddings("section_titles")
-    chapter_titles, chapter_emb = load_embeddings("chapter_titles")
     notes, _ = load_embeddings("chapter_notes")
     tables, _ = load_embeddings("tariff_tables")
 
     # Precompute all tariff table embeddings once
     all_table_texts = [t["text"] for t in tables]
     all_table_embs = model.encode(all_table_texts, convert_to_tensor=True)
-    all_note_texts = [n["text"] for n in notes]
-    all_note_embs = model.encode(all_note_texts, convert_to_tensor=True)
 
     queries = [
         "Meat of bovine animals",
@@ -460,10 +322,6 @@ def main():
         result = hierarchical_search(
             q,
             model,
-            section_titles,
-            section_emb,
-            chapter_titles,
-            chapter_emb,
             notes,
             tables,
             top_k=3,

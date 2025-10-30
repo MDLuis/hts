@@ -12,7 +12,5 @@ All embeddings were generated with [`sentence-transformers`](https://www.sbert.n
 
 | Dataset              | # Texts | Model                | Time (seconds) |
 |----------------------|---------|----------------------|----------------|
-| Section Titles            |    22 | all-MiniLM-L6-v2     |       0.12 |
-| Chapter Titles            |    99 | all-MiniLM-L6-v2     |       1.03 |
-| Chapter Notes             |  1050 | all-MiniLM-L6-v2     |      11.07 |
-| Tariff Tables             | 36108 | all-MiniLM-L6-v2     |     207.18 |
+| Chapter Notes | 1050 | all-MiniLM-L6-v2 | 9.10 |
+| Tariff Tables | 36108 | all-MiniLM-L6-v2 | 300.81 |
