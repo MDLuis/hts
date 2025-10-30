@@ -9,3 +9,4 @@ transformers>=4.45.0
 matplotlib>=3.9.0
 urllib3>=2.2.2
 pywin32>=306
+Flask>=3.1.2
