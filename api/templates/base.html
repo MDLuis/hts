@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Llama HTS Chat</title>
+  <style>
+    body { font-family: sans-serif; margin: 30px; }
+    #chat-box {
+      border: 1px solid #ccc;
+      padding: 10px;
+      width: 90%;
+      height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    textarea { width: 90%; height: 60px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>HTS Classification Assistant</h1>
+
+  <div id="chat-box">Model: Please describe your product.</div>
+  <textarea id="user-input" placeholder="Type your message..."></textarea>
+  <br>
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    let messages = null;
+    let started = false;
+
+    async function sendMessage() {
+      const inputBox = document.getElementById("user-input");
+      const chatBox = document.getElementById("chat-box");
+      const text = inputBox.value.trim();
+      if (!text) return;
+
+      chatBox.textContent += `\n\nYou: ${text}`;
+      inputBox.value = "";
+
+      try {
+        let response;
+        if (!started) {
+          response = await fetch("/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ description: text })
+          });
+          started = true;
+        } else {
+          response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reply: text, messages })
+          });
+        }
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+
+        messages = data.messages;
+        chatBox.textContent += `\n\nModel: ${data.response}`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        chatBox.textContent += `\n\n[Error] ${err.message}`;
+      }
+    }
+  </script>
+</body>
+</html>

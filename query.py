@@ -3,7 +3,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer, util
 from pathlib import Path
 import matplotlib.pyplot as plt
-from llama import load_llama, analyze_hts, chat_llama, analyze_notes
+from .llama import load_llama, analyze_hts, chat_llama, analyze_notes
 
 def load_embeddings(prefix: str):
     """
@@ -15,8 +15,11 @@ def load_embeddings(prefix: str):
             - metadata: List of dictionaries describing the text entries.
             - embeddings: NumPy array of corresponding embeddings.
     """
-    emb_path = Path(f"embeddings/{prefix}_embeddings_latest.npy")
-    meta_path = Path(f"embeddings/{prefix}_metadata_latest.json")
+    # emb_path = Path(f"embeddings/{prefix}_embeddings_latest.npy")
+    # meta_path = Path(f"embeddings/{prefix}_metadata_latest.json")
+    base_dir = Path(__file__).resolve().parent / "embeddings"
+    emb_path = base_dir / f"{prefix}_embeddings_latest.npy"
+    meta_path = base_dir / f"{prefix}_metadata_latest.json"
 
     if not emb_path.exists() or not meta_path.exists():
         raise FileNotFoundError(f"Missing files for prefix '{prefix}'")
@@ -407,6 +410,75 @@ def main():
         }
 
     generate_llama_report("llama.md", llama_results)
+
+def start_conv(description):
+    model_name = "all-MiniLM-L6-v2"
+    model = SentenceTransformer(model_name)
+
+    # Load embeddings
+    notes, _ = load_embeddings("chapter_notes")
+    tables, _ = load_embeddings("tariff_tables")
+
+    # Precompute all tariff table embeddings once
+    all_table_texts = [t["text"] for t in tables]
+    all_table_embs = model.encode(all_table_texts, convert_to_tensor=True)
+
+    result = hierarchical_search(
+            description,
+            model,
+            notes,
+            tables,
+            global_table_embs=all_table_embs,
+            global_table_texts=all_table_texts,
+        )
+    
+    pipe = load_llama()
+
+    global_tables = []
+    if result.get("global_table_scores") is not None and result.get("global_table_texts") is not None:
+        scores = np.array(result["global_table_scores"])
+        texts = result["global_table_texts"]
+        top_idx = np.argsort(-scores)[:10]
+        global_tables = [
+            {
+                "text": texts[i],
+                "score": float(scores[i]),
+                "htsno": tables[i].get("htsno"),
+                "chapter_title": tables[i].get("chapter_title"),
+            }
+            for i in top_idx
+        ]
+    elif result.get("global_top_table"):
+        global_tables = [result["global_top_table"]]
+
+    filtered_notes = result.get("notes_for_top_global_tables", [])
+
+    llama_tables = analyze_hts(
+        query=description,
+        tables=global_tables,
+    )
+    _, messages_t, _ = chat_llama(pipe, llama_tables)
+
+    llama_notes = analyze_notes(filtered_notes,messages_t)
+    response_n, messages_n, _ = chat_llama(pipe, llama_notes)
+
+
+    return {
+        "response": response_n,
+        "messages": messages_n,
+    }
+
+def continue_conv(reply, messages):
+    pipe = load_llama()
+    messages.append({
+        "role": "user",
+        "content": reply,
+    })
+    response, new_messages, _ = chat_llama(pipe, messages)
+    return {
+        "response": response,
+        "messages": new_messages,
+    }
 
 if __name__ == "__main__":
     main()
