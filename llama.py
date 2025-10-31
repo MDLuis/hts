@@ -17,7 +17,7 @@ def load_llama():
     )
     return pipe
 
-def load_general_rules(path="data/rules/general_rules_latest.json") -> str:
+def load_general_rules(path="hts/data/rules/general_rules_latest.json") -> str:
     """
     Load and format the General Rules of Interpretation and Additional U.S. Rules from a JSON file into a readable string.
     Args:
